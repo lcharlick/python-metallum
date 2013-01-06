@@ -32,7 +32,7 @@ REQUEST_TIMEOUT = (3, 7)
 UTC_OFFSET = 4
 
 
-def band_by_id(id):
+def band_for_id(id):
     return Band('bands/_/{0}'.format(id))
 
 
@@ -41,7 +41,7 @@ def band_search(name):
     return Search(url, BandResult)
 
 
-def album_by_id(id):
+def album_for_id(id):
     return AlbumWrapper(url='albums/_/_/{0}'.format(id))
 
 
@@ -745,7 +745,7 @@ if __name__ == '__main__':
     t = a.tracks[0]
 
     # Objects for split album tests
-    a2 = album_by_id(42682)
+    a2 = album_for_id(42682)
     t2 = a2.tracks[2]
 
     doctest.testmod(globs=locals())
