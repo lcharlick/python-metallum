@@ -435,7 +435,7 @@ class AlbumWrapper(Metallum):
         >>> len(a.tracks)
         8
         """
-        return Tracks(self._album.url)
+        return Tracks(self._album.url, self)
 
 
 class Album(Metallum):
@@ -457,10 +457,22 @@ class Album(Metallum):
         return 'albums/_/_/{0}'.format(self.id)
 
     @property
-    def band(self):
-        url = self._page('.band_name a').attr('href')
-        id = re.search('\d+$', url).group(0)
-        return Band('bands/_/{0}'.format(id))
+    def bands(self):
+        """Return a list of band objects. The list will only contain
+        multiple bands when the album is of type 'Split'.
+
+        >>> a.bands
+        [<Band: Metallica>]
+
+        >>> a2.bands
+        [<Band: Lunar Aurora>, <Band: Paysage d'Hiver>]
+        """
+        bands = []
+        for a in self._page('.band_name').find('a'):
+            url = PyQuery(a).attr('href')
+            id = re.search('\d+$', url).group(0)
+            bands.append(Band('bands/_/{0}'.format(id)))
+        return bands
 
     @property
     def added(self):
@@ -603,12 +615,12 @@ class LazyAlbum:
 
 class Tracks(MetallumCollection):
 
-    def __init__(self, url):
+    def __init__(self, url, album):
         super(Tracks, self).__init__(url)
 
         rows = self._page('table.table_lyrics').find('tr.odd, tr.even').not_('.displayNone')
         for index, track in enumerate(rows):
-            self.append(Track(rows.eq(index)))
+            self.append(Track(rows.eq(index), album))
 
         # Set disc numbers
         disc = 0
@@ -620,8 +632,9 @@ class Tracks(MetallumCollection):
 
 class Track:
 
-    def __init__(self, elem):
+    def __init__(self, elem, album):
         self._elem = elem
+        self.album = album
 
     def __repr__(self):
         return '<Track: {0} ({1})>'.format(self.title.encode(ENC), self.duration)
@@ -643,12 +656,30 @@ class Track:
         return int(self._elem('td').eq(0).text()[:-1])
 
     @property
+    def full_title(self):
+        """
+        >>> t.full_title
+        'Battery'
+
+        >>> t2.full_title
+        'Lunar Aurora - A Haudiga Fluag'
+        """
+        return self._elem('td').eq(1).text().replace('\n', '').replace('\t', '')
+
+    @property
     def title(self):
         """
         >>> t.title
         'Battery'
+
+        >>> t2.title
+        'A Haudiga Fluag'
         """
-        return self._elem('td').eq(1).text().strip()
+        title = self.full_title
+        # Remove band name from split album track titles
+        if self.album.type == AlbumTypes.SPLIT:
+            title = title[len(self.band.name) + 3:]
+        return title
 
     @property
     def duration(self):
@@ -667,6 +698,23 @@ class Track:
         else:
             seconds = 0
         return seconds
+
+    @property
+    def band(self):
+        """
+        >>> t.band
+        <Band: Metallica>
+
+        >>> t2.band
+        <Band: Lunar Aurora>
+        """
+        if self.album.type == AlbumTypes.SPLIT:
+            for band in self.album.bands:
+                if self.full_title.startswith(band.name):
+                    break
+        else:
+            band = self.album.bands[0]
+        return band
 
     @property
     def lyrics(self):
@@ -695,4 +743,9 @@ if __name__ == '__main__':
     b = band_search('metallica')[0]
     a = b.albums.search(type='Full-length')[2]
     t = a.tracks[0]
+
+    # Objects for split album tests
+    a2 = album_by_id(42682)
+    t2 = a2.tracks[2]
+
     doctest.testmod(globs=locals())
