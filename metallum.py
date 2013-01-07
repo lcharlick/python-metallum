@@ -708,7 +708,7 @@ class Tracks(MetallumCollection):
             overall_number += 1
 
 
-class Track:
+class Track(object):
 
     def __init__(self, elem, album):
         self._elem = elem
