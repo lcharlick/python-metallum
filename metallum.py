@@ -699,10 +699,13 @@ class Tracks(MetallumCollection):
 
         # Set disc numbers
         disc = 0
+        overall_number = 1
         for track in self:
             if track.number == 1:
                 disc += 1
             track.disc = disc
+            track.overall_number = overall_number
+            overall_number += 1
 
 
 class Track:
