@@ -498,12 +498,12 @@ class AlbumWrapper(Metallum):
         return Tracks(self._album.url, self)
 
     @property
-    def discs(self):
+    def disc_count(self):
         """
-        >>> a.discs
+        >>> a.disc_count
         1
 
-        >>> album_for_id(338756).discs
+        >>> album_for_id(338756).disc_count
         2
         """
         discs = 0
