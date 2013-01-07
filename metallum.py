@@ -497,6 +497,21 @@ class AlbumWrapper(Metallum):
         """
         return Tracks(self._album.url, self)
 
+    @property
+    def discs(self):
+        """
+        >>> a.discs
+        1
+
+        >>> album_for_id(338756).discs
+        2
+        """
+        discs = 0
+        for track in self.tracks:
+            if track.disc > discs:
+                discs = track.disc
+        return discs
+
 
 class Album(Metallum):
 
