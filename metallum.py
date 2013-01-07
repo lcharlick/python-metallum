@@ -503,13 +503,13 @@ class AlbumWrapper(Metallum):
         >>> a.disc_count
         1
 
-        >>> album_for_id(338756).disc_count
+        >>> a3.disc_count
         2
         """
         discs = 0
         for track in self.tracks:
-            if track.disc > discs:
-                discs = track.disc
+            if track.disc_number > discs:
+                discs = track.disc_number
         return discs
 
 
@@ -693,26 +693,24 @@ class Tracks(MetallumCollection):
     def __init__(self, url, album):
         super(Tracks, self).__init__(url)
 
+        disc = 1
+        overall_number = 1
         rows = self._page('table.table_lyrics').find('tr.odd, tr.even').not_('.displayNone')
         for index, track in enumerate(rows):
-            self.append(Track(rows.eq(index), album))
-
-        # Set disc numbers
-        disc = 0
-        overall_number = 1
-        for track in self:
-            if track.number == 1:
+            track = Track(rows.eq(index), album, disc, overall_number)
+            if index != 0 and track.number == 1:
                 disc += 1
-            track.disc = disc
-            track.overall_number = overall_number
             overall_number += 1
+            self.append(track)
 
 
 class Track(object):
 
-    def __init__(self, elem, album):
+    def __init__(self, elem, album, disc_number, overall_number):
         self._elem = elem
         self.album = album
+        self._disc_number = disc_number
+        self._overall_number = overall_number
 
     def __repr__(self):
         return '<Track: {0} ({1})>'.format(self.title.encode(ENC), self.duration)
@@ -730,8 +728,42 @@ class Track(object):
         """
         >>> t.number
         1
+
+        >>> a3.tracks[0].number
+        1
+
+        >>> a3.tracks[-1].number
+        4
         """
         return int(self._elem('td').eq(0).text()[:-1])
+
+    @property
+    def overall_number(self):
+        """
+        >>> t.overall_number
+        1
+
+        >>> a3.tracks[0].overall_number
+        1
+
+        >>> a3.tracks[-1].overall_number
+        8
+        """
+        return self._overall_number
+
+    @property
+    def disc_number(self):
+        """
+        >>> t.disc_number
+        1
+
+        >>> a3.tracks[0].disc_number
+        1
+
+        >>> a3.tracks[-1].disc_number
+        2
+        """
+        return self._disc_number
 
     @property
     def full_title(self):
@@ -825,5 +857,8 @@ if __name__ == '__main__':
     # Objects for split album tests
     a2 = album_for_id(42682)
     t2 = a2.tracks[2]
+
+    # Objects for multi-disc album testing
+    a3 = album_for_id(338756)
 
     doctest.testmod(globs=locals())
