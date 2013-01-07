@@ -11,6 +11,7 @@ import datetime
 
 from pyquery import PyQuery
 from urllib import quote
+from urllib import urlencode
 from urllib2 import urlopen
 
 
@@ -32,12 +33,45 @@ REQUEST_TIMEOUT = (3, 7)
 UTC_OFFSET = 4
 
 
+class NoSearchResultsError(Exception):
+    """ Search returned no results """
+
+
+def map_params(params, m):
+    res = {}
+    for k, v in params.iteritems():
+        res[m.get(k, k)] = v
+    return res
+
+
 def band_for_id(id):
     return Band('bands/_/{0}'.format(id))
 
 
-def band_search(name):
-    url = u'search/ajax-advanced/searching/bands/?bandName={0}&exactBandMatch=1'.format(quote(name.encode(ENC)))
+def band_search(name, strict=True, genre='', countries=[], year_created_from='',
+                year_created_to='', status=[], themes='', location='', label=''):
+    """Perform an advanced band search.
+    """
+    # Create a dict from the method arguments
+    params = locals()
+
+    # Convert boolean value to integer
+    params['strict'] = str(int(params['strict']))
+
+    # Map method arguments to their url query string counterparts
+    params = map_params(params, {
+        'name': 'bandName',
+        'strict': 'exactBandMatch',
+        'countries': 'country[]',
+        'year_created_from': 'yearCreationFrom',
+        'year_created_to': 'yearCreationTo',
+        'status': 'status[]',
+        'label': 'bandLabelName'
+    })
+
+    # Build the search URL
+    url = 'search/ajax-advanced/searching/bands/?' + urlencode(params, True)
+
     return Search(url, BandResult)
 
 
@@ -45,13 +79,39 @@ def album_for_id(id):
     return AlbumWrapper(url='albums/_/_/{0}'.format(id))
 
 
-def album_search(title):
-    url = u'search/ajax-advanced/searching/albums/?releaseTitle={0}&exactReleaseMatch=1'.format(quote(title.encode(ENC)))
+def album_search(title, strict=True, band='', band_strict=True, year_from='',
+                 year_to='', month_from='', month_to='', countries=[], location='', label='',
+                 indie_label=False, genre='', types=[]):
+    """Perform an advanced album search
+    """
+    # Create a dict from the method arguments
+    params = locals()
+
+    # Convert boolean value to integer
+    params['strict'] = str(int(params['strict']))
+    params['band_strict'] = str(int(params['band_strict']))
+    params['indie_label'] = str(int(params['indie_label']))
+
+    # Map method arguments to their url query string counterparts
+    params = map_params(params, {
+        'title': 'releaseTitle',
+        'strict': 'exactReleaseMatch',
+        'band': 'bandName',
+        'band_strict': 'exactBandMatch',
+        'year_from': 'releaseYearFrom',
+        'year_to': 'releaseYearTo',
+        'month_from': 'releaseMonthFrom',
+        'month_to': 'releaseMonthTo',
+        'countries': 'country[]',
+        'label': 'releaseLabelName',
+        'indie_label': 'indieLabel',
+        'types': 'releaseType[]'
+    })
+
+    # Build the search URL
+    url = 'search/ajax-advanced/searching/albums/?' + urlencode(params, True)
+
     return Search(url, AlbumResult)
-
-
-class NoSearchResultsError(Exception):
-    """ Search returned no results """
 
 
 class AlbumTypes(object):
