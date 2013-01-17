@@ -40,7 +40,8 @@ class NoSearchResultsError(Exception):
 def map_params(params, m):
     res = {}
     for k, v in params.iteritems():
-        res[m.get(k, k)] = v
+        if v is not None:
+            res[m.get(k, k)] = v
     return res
 
 
@@ -48,8 +49,8 @@ def band_for_id(id):
     return Band('bands/_/{0}'.format(id))
 
 
-def band_search(name, strict=True, genre='', countries=[], year_created_from='',
-                year_created_to='', status=[], themes='', location='', label=''):
+def band_search(name, strict=True, genre=None, countries=[], year_created_from=None,
+                year_created_to=None, status=[], themes=None, location=None, label=None):
     """Perform an advanced band search.
     """
     # Create a dict from the method arguments
@@ -79,9 +80,9 @@ def album_for_id(id):
     return AlbumWrapper(url='albums/_/_/{0}'.format(id))
 
 
-def album_search(title, strict=True, band='', band_strict=True, year_from='',
-                 year_to='', month_from='', month_to='', countries=[], location='', label='',
-                 indie_label=False, genre='', types=[]):
+def album_search(title, strict=True, band=None, band_strict=True, year_from=None,
+                 year_to=None, month_from=None, month_to=None, countries=[], location=None, label=None,
+                 indie_label=False, genre=None, types=[]):
     """Perform an advanced album search
     """
     # Create a dict from the method arguments
