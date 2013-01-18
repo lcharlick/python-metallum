@@ -218,9 +218,6 @@ class Search(Metallum, list):
             for result in results:
                 self.append(result_handler(result))
 
-    def __getitem__(self, index):
-        return list.__getitem__(self, index).transform()
-
 
 class SearchResult(list):
     """Represents a search result in an advanced search
@@ -237,7 +234,7 @@ class SearchResult(list):
         s = ' | '.join(self).encode(ENC)
         return '<SearchResult: {0}>'.format(s)
 
-    def transform(self):
+    def get(self):
         return self._type(self.url)
 
 
@@ -851,7 +848,7 @@ class Lyrics(Metallum):
 if __name__ == '__main__':
     import doctest
 
-    b = band_search('metallica')[0]
+    b = band_search('metallica')[0].get()
     a = b.albums.search(type='Full-length')[2]
     t = a.tracks[0]
 
