@@ -547,6 +547,18 @@ class Album(Metallum):
         return bands
 
     @property
+    def band_names(self):
+        """
+        >>> a.bands
+        Metallica
+
+        >>> a2.bands
+        Lunar Aurora / Paysage d'Hiver
+        """
+        names = [band.name for band in self.bands]
+        return ' / '.join(names)
+
+    @property
     def added(self):
         """
         >>> type(a.added)
