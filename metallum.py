@@ -389,7 +389,7 @@ class Band(Metallum):
     def location(self):
         """
         >>> b.location
-        'Los Angeles/San Francisco, California'
+        'Los Angeles / San Francisco, California'
         """
         return self._page('dd').eq(1).text()
 
@@ -413,7 +413,7 @@ class Band(Metallum):
     def genres(self):
         """
         >>> b.genres
-        ['Thrash Metal', 'Modern Rock/Metal']
+        ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
         """
         return self._page('dd').eq(4).text().split(', ')
 
@@ -457,8 +457,11 @@ class Band(Metallum):
     @property
     def albums(self):
         """
-        >>> len(b.albums) > 100
+        >>> len(b.albums) > 0
         True
+
+        >>> type(b.albums[0])
+        <class '__main__.AlbumWrapper'>
         """
         url = 'band/discography/id/{0}/tab/all'.format(self.id)
         return Albums(url)
@@ -648,7 +651,10 @@ class Album(Metallum):
     def label(self):
         """
         >>> a.label
-        'Elektra'
+        ''
+
+        >>> a3.label
+        'Osmose Productions'
         """
         return self._page('dd').eq(2)('a').text()
 
@@ -879,8 +885,10 @@ class Lyrics(Metallum):
 if __name__ == '__main__':
     import doctest
 
-    b = band_search('metallica')[0].get()
-    a = b.albums.search(type='Full-length')[2]
+    # Test objects
+    s = band_search('metallica')
+    b = s[0].get()
+    a = b.albums.search(type=AlbumTypes.FULL_LENGTH)[2]
     t = a.tracks[0]
 
     # Objects for split album tests
