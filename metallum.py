@@ -698,6 +698,7 @@ class Tracks(MetallumCollection):
             track = Track(rows.eq(index), album, disc, overall_number)
             if index != 0 and track.number == 1:
                 disc += 1
+                track._disc_number = disc
             overall_number += 1
             self.append(track)
 
