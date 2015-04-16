@@ -114,6 +114,8 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
 
     return Search(url, AlbumResult)
 
+def lyrics_for_id(id):
+    return unicode(Lyrics(id))
 
 class AlbumTypes(object):
     """Enum of all possible album types
