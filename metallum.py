@@ -651,9 +651,10 @@ class Album(Metallum):
     def cover(self):
         """
         >>> a.cover
-        'http://www.metal-archives.com/images/5/4/7/547.jpg?4520'
+        'http://www.metal-archives.com/images/5/4/7/547.jpg'
         """
-        return self._page('#cover').attr('href')
+        url = self._page('#cover').attr('href')
+        return url[:url.find('?')]
 
 
 class LazyAlbum:
