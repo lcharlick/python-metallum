@@ -424,17 +424,19 @@ class Band(Metallum):
     def logo(self):
         """
         >>> b.logo
-        'http://www.metal-archives.com/images/1/2/5/125_logo.png?4830'
+        'http://www.metal-archives.com/images/1/2/5/125_logo.gif'
         """
-        return self._page('#logo').attr('href')
+        url = self._page('#logo').attr('href')
+        return url[:url.find('?')]
 
     @property
     def photo(self):
         """
         >>> b.photo
-        'http://www.metal-archives.com/images/1/2/5/125_photo.jpg?4206'
+        'http://www.metal-archives.com/images/1/2/5/125_photo.jpg'
         """
-        return self._page('#photo').attr('href')
+        url = self._page('#photo').attr('href')
+        return url[:url.find('?')]
 
     @property
     def albums(self):
