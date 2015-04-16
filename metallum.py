@@ -292,17 +292,14 @@ class AlbumResult(SearchResult):
         return self[2]
 
     @property
-    def band_id(self):
-        url = PyQuery(self._details[0])('a').attr('href')
-        return re.search('\d+$', url).group(0)
-
-    @property
-    def band_url(self):
-        return 'bands/_/{0}'.format(self.band_id)
-
-    @property
-    def band(self):
-        return Band(self.band_url)
+    def bands(self):
+        bands = []
+        el = PyQuery(self._details[0]).wrap('<div></div>')
+        for a in el.find('a'):
+            url = PyQuery(a).attr('href')
+            id = re.search('\d+$', url).group(0)
+            bands.append(Band('bands/_/{0}'.format(id)))
+        return bands
 
     @property
     def band_name(self):
