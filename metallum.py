@@ -717,9 +717,9 @@ class Track(object):
     def id(self):
         """
         >>> t.id
-        5018
+        '5018A'
         """
-        return int(self._elem('td').eq(0)('a').attr('name'))
+        return self._elem('td').eq(0)('a').attr('name')
 
     @property
     def number(self):
