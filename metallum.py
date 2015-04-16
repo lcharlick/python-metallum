@@ -27,7 +27,7 @@ CR = '&#13;'
 CACHE_EXPIRY = 600
 
 # Min / max timeout between page requests, in seconds
-REQUEST_TIMEOUT = (3, 7)
+REQUEST_TIMEOUT = (1.0, 3.0)
 
 # UTC offset
 UTC_OFFSET = 4
