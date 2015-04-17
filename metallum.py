@@ -89,6 +89,12 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
     params['band_strict'] = str(int(params['band_strict']))
     params['indie_label'] = str(int(params['indie_label']))
 
+    # Month values must be present if year is supplied
+    if year_from and not month_from:
+        params['month_from'] = '1'
+    if year_to and not month_to:
+        params['month_to'] = '12'
+
     # Map method arguments to their url query string counterparts
     params = map_params(params, {
         'title': 'releaseTitle',
