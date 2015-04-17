@@ -33,10 +33,6 @@ REQUEST_TIMEOUT = (1.0, 3.0)
 UTC_OFFSET = 4
 
 
-class NoSearchResultsError(Exception):
-    """ Search returned no results """
-
-
 def map_params(params, m):
     res = {}
     for k, v in params.iteritems():
@@ -214,11 +210,8 @@ class Search(Metallum, list):
         super(Search, self).__init__(url)
 
         results = json.loads(self._html)['aaData']
-        if not len(results):
-            raise NoSearchResultsError
-        else:
-            for result in results:
-                self.append(result_handler(result))
+        for result in results:
+            self.append(result_handler(result))
 
 
 class SearchResult(list):
