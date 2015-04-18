@@ -8,11 +8,10 @@ import json
 import time
 import random
 import datetime
+import urllib2
 
 from pyquery import PyQuery
-from urllib import quote
 from urllib import urlencode
-from urllib2 import urlopen
 
 
 # Site details
@@ -31,6 +30,10 @@ REQUEST_TIMEOUT = (1.0, 3.0)
 
 # UTC offset
 UTC_OFFSET = 4
+
+
+class NetworkError(Exception):
+    """Exception conveying a problem in sending a request"""
 
 
 def map_params(params, m):
@@ -180,7 +183,13 @@ class Metallum(object):
             if time_since_request < timeout:
                 time.sleep(timeout - time_since_request)
         Metallum._last_request = time.time()
-        return urlopen(make_absolute(url)).read().decode(ENC)
+
+        try:
+            res = urllib2.urlopen(make_absolute(url))
+        except urllib2.URLError as e:
+            raise NetworkError(e.message)
+
+        return res.read().decode(ENC)
 
 
 class MetallumCollection(Metallum, list):
