@@ -177,11 +177,12 @@ class Metallum(object):
 
     @cache(CACHE_EXPIRY)
     def _fetch_page(self, url):
+        # Throttle requests
         if Metallum._last_request:
-            time_since_request = time.time() - Metallum._last_request
+            delta = time.time() - Metallum._last_request
             timeout = random.uniform(*REQUEST_TIMEOUT)
-            if time_since_request < timeout:
-                time.sleep(timeout - time_since_request)
+            if delta < timeout:
+                time.sleep(timeout - delta)
         Metallum._last_request = time.time()
 
         try:
