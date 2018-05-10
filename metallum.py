@@ -8,10 +8,10 @@ import json
 import time
 import random
 import datetime
-import urllib2
+import requests
 
 from pyquery import PyQuery
-from urllib import urlencode
+from urllib.parse import urlencode
 
 
 # Site details
@@ -38,7 +38,7 @@ class NetworkError(Exception):
 
 def map_params(params, m):
     res = {}
-    for k, v in params.iteritems():
+    for k, v in params.items():
         if v is not None:
             res[m.get(k, k)] = v
     return res
@@ -120,7 +120,7 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
     return Search(url, AlbumResult)
 
 def lyrics_for_id(id):
-    return unicode(Lyrics(id))
+    return Lyrics(id)
 
 class AlbumTypes(object):
     """Enum of all possible album types
@@ -186,11 +186,11 @@ class Metallum(object):
         Metallum._last_request = time.time()
 
         try:
-            res = urllib2.urlopen(make_absolute(url))
-        except urllib2.URLError as e:
+            res = requests.get(make_absolute(url))
+        except requests.exceptions.RequestException as e:
             raise NetworkError(e.message)
 
-        return res.read().decode(ENC)
+        return res.content.decode(ENC)
 
 
 class MetallumCollection(Metallum, list):
@@ -212,7 +212,7 @@ class MetallumCollection(Metallum, list):
         collection = self[:]
         for arg in kwargs:
             for item in collection[:]:
-                if unicode(kwargs[arg]).lower() != unicode(getattr(item, arg)).lower():
+                if kwargs[arg].lower() != getattr(item, arg).lower():
                     try:
                         collection.remove(item)
                     except ValueError:
@@ -876,7 +876,7 @@ class Track(object):
         >>> t.lyrics.split('\\n')[0]
         u'Lashing out the action, returning the reaction'
         """
-        return unicode(Lyrics(self.id))
+        return Lyrics(self.id)
 
 
 class Lyrics(Metallum):
