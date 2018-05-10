@@ -15,7 +15,7 @@ from urllib.parse import urlencode
 
 
 # Site details
-BASE_URL = 'http://www.metal-archives.com'
+BASE_URL = 'https://www.metal-archives.com'
 ENC = 'utf8'
 
 # HTML entities
