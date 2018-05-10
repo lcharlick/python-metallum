@@ -3,3 +3,4 @@
 .codeintel
 __pycache__/
 .idea
+venv*
