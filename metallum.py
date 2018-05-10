@@ -10,6 +10,7 @@ import random
 import datetime
 import requests
 
+from typing import List, Optional
 from pyquery import PyQuery
 from urllib.parse import urlencode
 
@@ -44,12 +45,12 @@ def map_params(params, m):
     return res
 
 
-def band_for_id(id):
+def band_for_id(id: int) -> 'Band':
     return Band('bands/_/{0}'.format(id))
 
 
 def band_search(name, strict=True, genre=None, countries=[], year_created_from=None,
-                year_created_to=None, status=[], themes=None, location=None, label=None):
+                year_created_to=None, status=[], themes=None, location=None, label=None) -> 'Search':
     """Perform an advanced band search.
     """
     # Create a dict from the method arguments
@@ -75,13 +76,13 @@ def band_search(name, strict=True, genre=None, countries=[], year_created_from=N
     return Search(url, BandResult)
 
 
-def album_for_id(id):
+def album_for_id(id: int) -> 'AlbumWrapper':
     return AlbumWrapper(url='albums/_/_/{0}'.format(id))
 
 
 def album_search(title, strict=True, band=None, band_strict=True, year_from=None,
                  year_to=None, month_from=None, month_to=None, countries=[], location=None, label=None,
-                 indie_label=False, genre=None, types=[]):
+                 indie_label=False, genre=None, types=[]) -> 'Search':
     """Perform an advanced album search
     """
     # Create a dict from the method arguments
@@ -119,8 +120,10 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
 
     return Search(url, AlbumResult)
 
-def lyrics_for_id(id):
+
+def lyrics_for_id(id: int) -> 'Lyrics':
     return Lyrics(id)
+
 
 class AlbumTypes(object):
     """Enum of all possible album types
@@ -136,13 +139,13 @@ class AlbumTypes(object):
     SPLIT = 'Split'
 
 
-def make_absolute(endpoint):
+def make_absolute(endpoint: str) -> str:
     """Make relative URLs absolute
     """
     return '{0}/{1}'.format(BASE_URL, endpoint)
 
 
-def offset_time(t):
+def offset_time(t: datetime.datetime) -> datetime.datetime:
     """Convert server time to UTC
     """
     td = datetime.timedelta(hours=UTC_OFFSET)
@@ -176,7 +179,7 @@ class Metallum(object):
         self._page = PyQuery(self._html)
 
     @cache(CACHE_EXPIRY)
-    def _fetch_page(self, url):
+    def _fetch_page(self, url) -> bytes:
         # Throttle requests
         if Metallum._last_request:
             delta = time.time() - Metallum._last_request
@@ -191,7 +194,7 @@ class Metallum(object):
         except requests.exceptions.RequestException as e:
             raise NetworkError(e.message)
 
-        return res.content.decode(ENC)
+        return res.content
 
 
 class MetallumCollection(Metallum, list):
@@ -200,7 +203,7 @@ class MetallumCollection(Metallum, list):
     def __init__(self, url):
         super(MetallumCollection, self).__init__(url)
 
-    def search(self, **kwargs):
+    def search(self, **kwargs) -> 'MetallumCollection':
         """Query the collection based on one or more key value pairs, where the
         keys are attributes of the contained objects:
 
@@ -246,7 +249,7 @@ class SearchResult(list):
         s = ' | '.join(self)
         return '<SearchResult: {0}>'.format(s)
 
-    def get(self):
+    def get(self) -> 'Metallum':
         return self._type(self.url)
 
 
@@ -258,7 +261,7 @@ class BandResult(SearchResult):
         self._type = Band
 
     @property
-    def id(self):
+    def id(self) -> int:
         """
         >>> s[0].id
         125
@@ -267,11 +270,11 @@ class BandResult(SearchResult):
         return int(re.search('\d+$', url).group(0))
 
     @property
-    def url(self):
+    def url(self) -> str:
         return 'bands/_/{0}'.format(self.id)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         >>> s[0].name
         'Metallica'
@@ -279,7 +282,7 @@ class BandResult(SearchResult):
         return self[0]
 
     @property
-    def genres(self):
+    def genres(self) -> List[str]:
         """
         >>> s[0].genres
         ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
@@ -287,7 +290,7 @@ class BandResult(SearchResult):
         return self[1].split(', ')
 
     @property
-    def country(self):
+    def country(self) -> str:
         """
         >>> s[0].country
         'United States'
@@ -303,24 +306,24 @@ class AlbumResult(SearchResult):
         self._type = AlbumWrapper
 
     @property
-    def id(self):
+    def id(self) -> int:
         url = PyQuery(self._details[1])('a').attr('href')
         return int(re.search('\d+$', url).group(0))
 
     @property
-    def url(self):
+    def url(self) -> str:
         return 'albums/_/_/{0}'.format(self.id)
 
     @property
-    def title(self):
+    def title(self) -> str:
         return self[1]
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self[2]
 
     @property
-    def bands(self):
+    def bands(self) -> List['Band']:
         bands = []
         el = PyQuery(self._details[0]).wrap('<div></div>')
         for a in el.find('a'):
@@ -330,7 +333,7 @@ class AlbumResult(SearchResult):
         return bands
 
     @property
-    def band_name(self):
+    def band_name(self) -> str:
         return self[0]
 
 
@@ -343,7 +346,7 @@ class Band(Metallum):
         return '<Band: {0}>'.format(self.name)
 
     @property
-    def id(self):
+    def id(self) -> int:
         """
         >>> b.id
         125
@@ -352,11 +355,11 @@ class Band(Metallum):
         return int(re.search('\d+$', url).group(0))
 
     @property
-    def url(self):
+    def url(self) -> str:
         return 'bands/_/{0}'.format(self.id)
 
     @property
-    def added(self):
+    def added(self) -> Optional[datetime.datetime]:
         """
         >>> type(b.added)
         <class 'datetime.datetime'>
@@ -368,7 +371,7 @@ class Band(Metallum):
             return None
 
     @property
-    def modified(self):
+    def modified(self) -> Optional[datetime.datetime]:
         """
         >>> type(b.modified)
         <class 'datetime.datetime'>
@@ -380,7 +383,7 @@ class Band(Metallum):
             return None
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         >>> b.name
         'Metallica'
@@ -388,7 +391,7 @@ class Band(Metallum):
         return self._page('h1.band_name').text().strip()
 
     @property
-    def country(self):
+    def country(self) -> str:
         """
         >>> b.country
         'United States'
@@ -396,7 +399,7 @@ class Band(Metallum):
         return self._page('dd').eq(0)('a').text()
 
     @property
-    def location(self):
+    def location(self) -> str:
         """
         >>> b.location
         'Los Angeles/San Francisco, California'
@@ -404,7 +407,7 @@ class Band(Metallum):
         return self._page('dd').eq(1).text()
 
     @property
-    def status(self):
+    def status(self) -> str:
         """
         >>> b.status
         'Active'
@@ -412,7 +415,7 @@ class Band(Metallum):
         return self._page('dd').eq(2).text()
 
     @property
-    def formed_in(self):
+    def formed_in(self) -> int:
         """
         >>> b.formed_in
         1981
@@ -420,7 +423,7 @@ class Band(Metallum):
         return int(self._page('dd').eq(3).text())
 
     @property
-    def genres(self):
+    def genres(self) -> List[str]:
         """
         >>> b.genres
         ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
@@ -428,7 +431,7 @@ class Band(Metallum):
         return self._page('dd').eq(4).text().split(', ')
 
     @property
-    def themes(self):
+    def themes(self) -> List[str]:
         """
         >>> b.themes
         ['Corruption', 'Death', 'Life', 'Internal struggles', 'Anger']
@@ -436,7 +439,7 @@ class Band(Metallum):
         return self._page('dd').eq(5).text().split(', ')
 
     @property
-    def label(self):
+    def label(self) -> str:
         """
         >>> b.label
         'Blackened Recordings'
@@ -447,7 +450,7 @@ class Band(Metallum):
         return elem.text()
 
     @property
-    def logo(self):
+    def logo(self) -> str:
         """
         >>> b.logo
         'https://www.metal-archives.com/images/1/2/5/125_logo.png'
@@ -456,7 +459,7 @@ class Band(Metallum):
         return url[:url.find('?')]
 
     @property
-    def photo(self):
+    def photo(self) -> str:
         """
         >>> b.photo
         'https://www.metal-archives.com/images/1/2/5/125_photo.jpg'
@@ -465,7 +468,7 @@ class Band(Metallum):
         return url[:url.find('?')]
 
     @property
-    def albums(self):
+    def albums(self) -> List['Albums']:
         """
         >>> len(b.albums) > 0
         True
@@ -547,7 +550,7 @@ class Album(Metallum):
         super(Album, self).__init__(url)
 
     @property
-    def id(self):
+    def id(self) -> int:
         """
         >>> a.id
         547
@@ -556,11 +559,11 @@ class Album(Metallum):
         return int(re.search('\d+$', url).group(0))
 
     @property
-    def url(self):
+    def url(self) -> str:
         return 'albums/_/_/{0}'.format(self.id)
 
     @property
-    def bands(self):
+    def bands(self) -> List[Band]:
         """Return a list of band objects. The list will only contain
         multiple bands when the album is of type 'Split'.
 
@@ -578,7 +581,7 @@ class Album(Metallum):
         return bands
 
     @property
-    def added(self):
+    def added(self) -> Optional[datetime.datetime]:
         """
         >>> type(a.added)
         <class 'NoneType'>
@@ -590,7 +593,7 @@ class Album(Metallum):
             return None
 
     @property
-    def modified(self):
+    def modified(self) -> Optional[datetime.datetime]:
         """
         >>> type(a.modified)
         <class 'datetime.datetime'>
@@ -602,7 +605,7 @@ class Album(Metallum):
             return None
 
     @property
-    def title(self):
+    def title(self) -> str:
         """
         >>> a.title
         'Master of Puppets'
@@ -610,7 +613,7 @@ class Album(Metallum):
         return self._page('h1.album_name a').text()
 
     @property
-    def type(self):
+    def type(self) -> str:
         """
         >>> a.type
         'Full-length'
@@ -618,7 +621,7 @@ class Album(Metallum):
         return self._page('dd').eq(0).text()
 
     @property
-    def date(self):
+    def date(self) -> Optional[datetime.datetime]:
         """
         >>> a.date
         datetime.datetime(1986, 3, 3, 0, 0)
@@ -638,7 +641,7 @@ class Album(Metallum):
         return date
 
     @property
-    def year(self):
+    def year(self) -> int:
         """
         >>> a.year
         1986
@@ -646,7 +649,7 @@ class Album(Metallum):
         return int(self._page('dd').eq(1).text()[-4:])
 
     @property
-    def label(self):
+    def label(self) -> str:
         """
         >>> a.label
         ''
@@ -657,7 +660,7 @@ class Album(Metallum):
         return self._page('dd').eq(2)('a').text()
 
     @property
-    def score(self):
+    def score(self) -> int:
         """
         >>> a.score
         79
@@ -668,7 +671,7 @@ class Album(Metallum):
         return None
 
     @property
-    def cover(self):
+    def cover(self) -> str:
         """
         >>> a.cover
         'https://www.metal-archives.com/images/5/4/7/547.jpg'
@@ -683,7 +686,7 @@ class LazyAlbum:
         self._elem = elem
 
     @property
-    def id(self):
+    def id(self) -> int:
         """
         >>> a.id
         547
@@ -692,11 +695,11 @@ class LazyAlbum:
         return int(re.search('\d+$', url).group(0))
 
     @property
-    def url(self):
+    def url(self) -> str:
         return 'albums/_/_/{0}'.format(self.id)
 
     @property
-    def title(self):
+    def title(self) -> str:
         """
         >>> a.title
         'Master of Puppets'
@@ -704,7 +707,7 @@ class LazyAlbum:
         return self._elem('td').eq(0)('a').text()
 
     @property
-    def type(self):
+    def type(self) -> str:
         """
         >>> a.type
         'Full-length'
@@ -712,7 +715,7 @@ class LazyAlbum:
         return self._elem('td').eq(1).text()
 
     @property
-    def year(self):
+    def year(self) -> int:
         """
         >>> a.year
         1986
@@ -749,7 +752,7 @@ class Track(object):
         return '<Track: {0} ({1})>'.format(self.title, self.duration)
 
     @property
-    def id(self):
+    def id(self) -> str:
         """
         >>> t.id
         '5018A'
@@ -757,7 +760,7 @@ class Track(object):
         return self._elem('td').eq(0)('a').attr('name')
 
     @property
-    def number(self):
+    def number(self) -> int:
         """
         >>> t.number
         1
@@ -771,7 +774,7 @@ class Track(object):
         return int(self._elem('td').eq(0).text()[:-1])
 
     @property
-    def overall_number(self):
+    def overall_number(self) -> int:
         """
         >>> t.overall_number
         1
@@ -785,7 +788,7 @@ class Track(object):
         return self._overall_number
 
     @property
-    def disc_number(self):
+    def disc_number(self) -> int:
         """
         >>> t.disc_number
         1
@@ -799,7 +802,7 @@ class Track(object):
         return self._disc_number
 
     @property
-    def full_title(self):
+    def full_title(self) -> str:
         """
         >>> t.full_title
         'Battery'
@@ -810,7 +813,7 @@ class Track(object):
         return self._elem('td').eq(1).text().replace('\n', '').replace('\t', '')
 
     @property
-    def title(self):
+    def title(self) -> str:
         """
         >>> t.title
         'Battery'
@@ -825,7 +828,7 @@ class Track(object):
         return title
 
     @property
-    def duration(self):
+    def duration(self) -> int:
         """
         >>> t.duration
         313
@@ -843,7 +846,7 @@ class Track(object):
         return seconds
 
     @property
-    def band(self):
+    def band(self) -> Band:
         """
         >>> t.band
         <Band: Metallica>
@@ -860,7 +863,7 @@ class Track(object):
         return band
 
     @property
-    def lyrics(self):
+    def lyrics(self) -> 'Lyrics':
         """
         >>> str(t.lyrics).split('\\n')[0]
         'Lashing out the action, returning the reaction'
