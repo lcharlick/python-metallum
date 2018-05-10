@@ -192,7 +192,7 @@ class Metallum(object):
         try:
             res = requests.get(make_absolute(url))
         except requests.exceptions.RequestException as e:
-            raise NetworkError(e.message)
+            raise NetworkError(e)
 
         return res.content
 
@@ -237,7 +237,10 @@ class Search(Metallum, list):
 class SearchResult(list):
     """Represents a search result in an advanced search
     """
+    resultType = None
+
     def __init__(self, details):
+        super().__init__()
         for detail in details:
             if re.match('^<a href.*', detail):
                 d = PyQuery(detail)
@@ -250,7 +253,7 @@ class SearchResult(list):
         return '<SearchResult: {0}>'.format(s)
 
     def get(self) -> 'Metallum':
-        return self._type(self.url)
+        return self.resultType(self.url)
 
 
 class BandResult(SearchResult):
@@ -258,7 +261,7 @@ class BandResult(SearchResult):
     def __init__(self, details):
         super(BandResult, self).__init__(details)
         self._details = details
-        self._type = Band
+        self.resultType = Band
 
     @property
     def id(self) -> int:
@@ -303,7 +306,7 @@ class AlbumResult(SearchResult):
     def __init__(self, details):
         super(AlbumResult, self).__init__(details)
         self._details = details
-        self._type = AlbumWrapper
+        self.resultType = AlbumWrapper
 
     @property
     def id(self) -> int:
@@ -507,6 +510,7 @@ class AlbumWrapper(Metallum):
     """
 
     def __init__(self, url=None, elem=None):
+        super().__init__(url)
         if url:
             self._album = Album(url)
         elif elem:
@@ -660,7 +664,7 @@ class Album(Metallum):
         return self._page('dd').eq(2)('a').text()
 
     @property
-    def score(self) -> int:
+    def score(self) -> Optional[int]:
         """
         >>> a.score
         79
