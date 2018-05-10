@@ -471,7 +471,7 @@ class Band(Metallum):
         return url[:url.find('?')]
 
     @property
-    def albums(self) -> List['Albums']:
+    def albums(self) -> List['AlbumCollection']:
         """
         >>> len(b.albums) > 0
         True
@@ -480,13 +480,13 @@ class Band(Metallum):
         <class '__main__.AlbumWrapper'>
         """
         url = 'band/discography/id/{0}/tab/all'.format(self.id)
-        return Albums(url)
+        return AlbumCollection(url)
 
 
-class Albums(MetallumCollection):
+class AlbumCollection(MetallumCollection):
 
     def __init__(self, url):
-        super(Albums, self).__init__(url)
+        super(AlbumCollection, self).__init__(url)
 
         rows = self._page('tr:gt(0)')
         for index, album in enumerate(rows):
@@ -530,7 +530,7 @@ class AlbumWrapper(Metallum):
         >>> len(a.tracks)
         8
         """
-        return Tracks(self._album.url, self)
+        return TrackCollection(self._album.url, self)
 
     @property
     def disc_count(self):
@@ -727,10 +727,10 @@ class LazyAlbum:
         return int(self._elem('td').eq(2).text())
 
 
-class Tracks(MetallumCollection):
+class TrackCollection(MetallumCollection):
 
     def __init__(self, url, album):
-        super(Tracks, self).__init__(url)
+        super(TrackCollection, self).__init__(url)
 
         disc = 1
         overall_number = 1
