@@ -139,7 +139,7 @@ class AlbumTypes(object):
 def make_absolute(endpoint):
     """Make relative URLs absolute
     """
-    return u'{0}/{1}'.format(BASE_URL, endpoint)
+    return '{0}/{1}'.format(BASE_URL, endpoint)
 
 
 def offset_time(t):
@@ -185,6 +185,7 @@ class Metallum(object):
                 time.sleep(timeout - delta)
         Metallum._last_request = time.time()
 
+        # print(url)
         try:
             res = requests.get(make_absolute(url))
         except requests.exceptions.RequestException as e:
@@ -242,7 +243,7 @@ class SearchResult(list):
                 self.append(detail)
 
     def __repr__(self):
-        s = ' | '.join(self).encode(ENC)
+        s = ' | '.join(self)
         return '<SearchResult: {0}>'.format(s)
 
     def get(self):
@@ -281,7 +282,7 @@ class BandResult(SearchResult):
     def genres(self):
         """
         >>> s[0].genres
-        [u'Thrash Metal (early)', u'Hard Rock/Heavy/Thrash Metal (later)']
+        ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
         """
         return self[1].split(', ')
 
@@ -289,7 +290,7 @@ class BandResult(SearchResult):
     def country(self):
         """
         >>> s[0].country
-        u'United States'
+        'United States'
         """
         return self[2]
 
@@ -339,7 +340,7 @@ class Band(Metallum):
         super(Band, self).__init__(url)
 
     def __repr__(self):
-        return '<Band: {0}>'.format(self.name.encode(ENC))
+        return '<Band: {0}>'.format(self.name)
 
     @property
     def id(self):
@@ -358,7 +359,7 @@ class Band(Metallum):
     def added(self):
         """
         >>> type(b.added)
-        <type 'datetime.datetime'>
+        <class 'datetime.datetime'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(0).text()[10:]
         try:
@@ -370,7 +371,7 @@ class Band(Metallum):
     def modified(self):
         """
         >>> type(b.modified)
-        <type 'datetime.datetime'>
+        <class 'datetime.datetime'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(1).text()[18:]
         try:
@@ -398,7 +399,7 @@ class Band(Metallum):
     def location(self):
         """
         >>> b.location
-        'Los Angeles / San Francisco, California'
+        'Los Angeles/San Francisco, California'
         """
         return self._page('dd').eq(1).text()
 
@@ -430,7 +431,7 @@ class Band(Metallum):
     def themes(self):
         """
         >>> b.themes
-        ['Corruption', 'Death', 'Life', 'Internal Struggles', 'Anger']
+        ['Corruption', 'Death', 'Life', 'Internal struggles', 'Anger']
         """
         return self._page('dd').eq(5).text().split(', ')
 
@@ -449,7 +450,7 @@ class Band(Metallum):
     def logo(self):
         """
         >>> b.logo
-        'http://www.metal-archives.com/images/1/2/5/125_logo.gif'
+        'https://www.metal-archives.com/images/1/2/5/125_logo.png'
         """
         url = self._page('#logo').attr('href')
         return url[:url.find('?')]
@@ -458,7 +459,7 @@ class Band(Metallum):
     def photo(self):
         """
         >>> b.photo
-        'http://www.metal-archives.com/images/1/2/5/125_photo.jpg'
+        'https://www.metal-archives.com/images/1/2/5/125_photo.jpg'
         """
         url = self._page('#photo').attr('href')
         return url[:url.find('?')]
@@ -509,7 +510,7 @@ class AlbumWrapper(Metallum):
             self._album = LazyAlbum(elem)
 
     def __repr__(self):
-        return '<Album: {0} ({1})>'.format(self.title.encode(ENC), self.type)
+        return '<Album: {0} ({1})>'.format(self.title, self.type)
 
     def __getattr__(self, name):
         if not hasattr(self._album, name) and hasattr(Album, name):
@@ -579,10 +580,10 @@ class Album(Metallum):
     @property
     def band_names(self):
         """
-        >>> a.bands
+        >>> a.band_names
         Metallica
 
-        >>> a2.bands
+        >>> a2.band_names
         Lunar Aurora / Paysage d'Hiver
         """
         names = [band.name for band in self.bands]
@@ -592,7 +593,7 @@ class Album(Metallum):
     def added(self):
         """
         >>> type(a.added)
-        <type 'NoneType'>
+        <class 'NoneType'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(0).text()[10:]
         try:
@@ -604,7 +605,7 @@ class Album(Metallum):
     def modified(self):
         """
         >>> type(a.modified)
-        <type 'datetime.datetime'>
+        <class 'datetime.datetime'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(1).text()[18:]
         try:
@@ -632,7 +633,7 @@ class Album(Metallum):
     def date(self):
         """
         >>> a.date
-        datetime.datetime(1986, 2, 21, 0, 0)
+        datetime.datetime(1986, 3, 3, 0, 0)
         """
         try:
             from dateutil import parser
@@ -682,7 +683,7 @@ class Album(Metallum):
     def cover(self):
         """
         >>> a.cover
-        'http://www.metal-archives.com/images/5/4/7/547.jpg'
+        'https://www.metal-archives.com/images/5/4/7/547.jpg'
         """
         url = self._page('#cover').attr('href')
         return url[:url.find('?')]
@@ -757,7 +758,7 @@ class Track(object):
         self._overall_number = overall_number
 
     def __repr__(self):
-        return '<Track: {0} ({1})>'.format(self.title.encode(ENC), self.duration)
+        return '<Track: {0} ({1})>'.format(self.title, self.duration)
 
     @property
     def id(self):
@@ -816,7 +817,7 @@ class Track(object):
         'Battery'
 
         >>> t2.full_title
-        'Lunar Aurora - A Haudiga Fluag'
+        'Lunar Aurora - A haudiga Fluag'
         """
         return self._elem('td').eq(1).text().replace('\n', '').replace('\t', '')
 
@@ -827,7 +828,7 @@ class Track(object):
         'Battery'
 
         >>> t2.title
-        'A Haudiga Fluag'
+        'A haudiga Fluag'
         """
         title = self.full_title
         # Remove band name from split album track titles
@@ -839,7 +840,7 @@ class Track(object):
     def duration(self):
         """
         >>> t.duration
-        312
+        313
         """
         s = self._elem('td').eq(2).text()
         if s:
@@ -873,8 +874,8 @@ class Track(object):
     @property
     def lyrics(self):
         """
-        >>> t.lyrics.split('\\n')[0]
-        u'Lashing out the action, returning the reaction'
+        >>> str(t.lyrics).split('\\n')[0]
+        'Lashing out the action, returning the reaction'
         """
         return Lyrics(self.id)
 
@@ -884,7 +885,7 @@ class Lyrics(Metallum):
     def __init__(self, id):
         super(Lyrics, self).__init__('release/ajax-view-lyrics/id/{0}'.format(id))
 
-    def __unicode__(self):
+    def __str__(self):
         lyrics = self._page('p').html()
         if not lyrics:
             return ''
