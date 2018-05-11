@@ -25,8 +25,8 @@ ENC = 'utf8'
 BR = '<br/>'
 CR = '&#13;'
 
-# Min / max timeout between page requests, in seconds
-REQUEST_TIMEOUT = (3.0, 5.0)
+# Timeout between page requests, in seconds
+REQUEST_TIMEOUT = 1.0
 
 # UTC offset
 UTC_OFFSET = 4
@@ -171,7 +171,7 @@ class Metallum(object):
         def hook(response, *args, **kwargs):
             is_cached = getattr(response, 'from_cache', False)
             if not is_cached:
-                time.sleep(timeout)
+                time.sleep(REQUEST_TIMEOUT)
             print("{}{}".format(response.request.url, " (CACHED)" if is_cached else ""))
             return response
         return hook
