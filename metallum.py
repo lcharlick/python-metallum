@@ -163,7 +163,7 @@ class Metallum(object):
         self._html = self._fetch_page(url)
         self._page = PyQuery(self._html)
 
-    def _make_throttle_hook(self, timeout=1.0):
+    def _make_throttle_hook(self):
         """
         Returns a response hook function which sleeps for `timeout` seconds if
         response is not cached
@@ -221,7 +221,7 @@ class Search(Metallum, list):
 class SearchResult(list):
     """Represents a search result in an advanced search
     """
-    resultType = None
+    _resultType = None
 
     def __init__(self, details):
         super().__init__()
@@ -237,7 +237,7 @@ class SearchResult(list):
         return '<SearchResult: {0}>'.format(s)
 
     def get(self) -> 'Metallum':
-        return self.resultType(self.url)
+        return self._resultType(self.url)
 
 
 class BandResult(SearchResult):
@@ -245,7 +245,7 @@ class BandResult(SearchResult):
     def __init__(self, details):
         super().__init__(details)
         self._details = details
-        self.resultType = Band
+        self._resultType = Band
 
     @property
     def id(self) -> int:
