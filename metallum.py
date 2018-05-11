@@ -164,6 +164,11 @@ def dd_element_for_label(label: str, page: PyQuery) -> Optional[PyQuery]:
     return page('dd').eq(index)
 
 
+def dd_text_for_label(label: str, page: PyQuery) -> str:
+    element = dd_element_for_label(label, page)
+    return element.text() if element else ""
+
+
 class Metallum(object):
     """Base metallum class - represents a metallum page
     """
@@ -396,8 +401,7 @@ class Band(Metallum):
         >>> b.country
         'United States'
         """
-        element = dd_element_for_label('Country of origin:', self._page)
-        return element.text() if element else ""
+        return dd_text_for_label('Country of origin:', self._page)
 
     @property
     def location(self) -> str:
@@ -405,8 +409,7 @@ class Band(Metallum):
         >>> b.location
         'Los Angeles/San Francisco, California'
         """
-        element = dd_element_for_label('Location:', self._page)
-        return element.text() if element else ""
+        return dd_text_for_label('Location:', self._page)
 
     @property
     def status(self) -> str:
@@ -414,8 +417,7 @@ class Band(Metallum):
         >>> b.status
         'Active'
         """
-        element = dd_element_for_label('Status:', self._page)
-        return element.text() if element else ""
+        return dd_text_for_label('Status:', self._page)
 
     @property
     def formed_in(self) -> str:
@@ -423,8 +425,7 @@ class Band(Metallum):
         >>> b.formed_in
         '1981'
         """
-        element = dd_element_for_label('Formed in:', self._page)
-        return element.text() if element else ""
+        return dd_text_for_label('Formed in:', self._page)
 
     @property
     def genres(self) -> List[str]:
@@ -432,8 +433,7 @@ class Band(Metallum):
         >>> b.genres
         ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
         """
-        element = dd_element_for_label('Genre:', self._page)
-        return element.text().split(', ') if element else ""
+        return dd_text_for_label('Genre:', self._page).split(', ')
 
     @property
     def themes(self) -> List[str]:
@@ -441,8 +441,7 @@ class Band(Metallum):
         >>> b.themes
         ['Corruption', 'Death', 'Life', 'Internal struggles', 'Anger']
         """
-        element = dd_element_for_label('Lyrical themes:', self._page)
-        return element.text().split(', ') if element else ""
+        return dd_text_for_label('Lyrical themes:', self._page).split(', ')
 
     @property
     def label(self) -> str:
@@ -450,8 +449,7 @@ class Band(Metallum):
         >>> b.label
         'Blackened Recordings'
         """
-        element = dd_element_for_label('Current label:', self._page)
-        return element.text() if element else ""
+        return dd_text_for_label('Current label:', self._page)
 
     @property
     def logo(self) -> str:
@@ -637,7 +635,7 @@ class Album(Metallum):
         except ImportError:
             return None
 
-        s = dd_element_for_label('Release date:', self._page).text()
+        s = dd_text_for_label('Release date:', self._page)
 
         # Date has no day portion
         if len(s) > 4 and ',' not in s:
