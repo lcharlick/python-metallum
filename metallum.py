@@ -3,17 +3,15 @@
 
 """Python interface for www.metal-archives.com
 """
-import re
-import json
-import time
-import random
 import datetime
-import requests
-import requests_cache
-
+import json
+import re
+import time
 from typing import List, Optional
-from pyquery import PyQuery
 from urllib.parse import urlencode
+
+import requests_cache
+from pyquery import PyQuery
 from requests_cache.core import remove_expired_responses
 
 requests_cache.install_cache('cache', expire_after=30)
