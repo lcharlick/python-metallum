@@ -45,7 +45,7 @@ def map_params(params, m):
     return res
 
 
-def band_for_id(id: int) -> 'Band':
+def band_for_id(id: str) -> 'Band':
     return Band('bands/_/{0}'.format(id))
 
 
@@ -76,7 +76,7 @@ def band_search(name, strict=True, genre=None, countries=[], year_created_from=N
     return Search(url, BandResult)
 
 
-def album_for_id(id: int) -> 'AlbumWrapper':
+def album_for_id(id: str) -> 'AlbumWrapper':
     return AlbumWrapper(url='albums/_/_/{0}'.format(id))
 
 
@@ -269,13 +269,13 @@ class BandResult(SearchResult):
         self._resultType = Band
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """
         >>> s[0].id
-        125
+        '125'
         """
         url = PyQuery(self._details[0])('a').attr('href')
-        return int(re.search('\d+$', url).group(0))
+        return re.search('\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -314,9 +314,9 @@ class AlbumResult(SearchResult):
         self.resultType = AlbumWrapper
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         url = PyQuery(self._details[1])('a').attr('href')
-        return int(re.search('\d+$', url).group(0))
+        return re.search('\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -354,13 +354,13 @@ class Band(MetallumEntity):
         return '<Band: {0}>'.format(self.name)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """
         >>> b.id
-        125
+        '125'
         """
         url = self._page('.band_name a').attr('href')
-        return int(re.search('\d+$', url).group(0))
+        return re.search('\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -556,13 +556,13 @@ class Album(MetallumEntity):
         super().__init__(url)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """
         >>> a.id
-        547
+        '547'
         """
         url = self._page('.album_name a').attr('href')
-        return int(re.search('\d+$', url).group(0))
+        return re.search('\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -700,13 +700,13 @@ class LazyAlbum:
         self._elem = elem
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """
         >>> a.id
-        547
+        '547'
         """
         url = self._elem('td').eq(0)('a').attr('href')
-        return int(re.search('\d+$', url).group(0))
+        return re.search('\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -907,10 +907,10 @@ if __name__ == '__main__':
     t = a.tracks[0]
 
     # Objects for split album tests
-    a2 = album_for_id(42682)
+    a2 = album_for_id('42682')
     t2 = a2.tracks[2]
 
     # Objects for multi-disc album testing
-    a3 = album_for_id(338756)
+    a3 = album_for_id('338756')
 
     doctest.testmod(globs=locals())
