@@ -14,7 +14,7 @@ import requests_cache
 from pyquery import PyQuery
 from requests_cache.core import remove_expired_responses
 
-requests_cache.install_cache('cache', expire_after=30)
+requests_cache.install_cache('cache', expire_after=300)
 remove_expired_responses()
 
 # Site details
@@ -149,6 +149,19 @@ def offset_time(t: datetime.datetime) -> datetime.datetime:
     """
     td = datetime.timedelta(hours=UTC_OFFSET)
     return t + td
+
+
+def dd_element_for_label(label: str, page: PyQuery) -> Optional[PyQuery]:
+    """Data on entity pages are stored in <dt> / <dd> pairs
+    """
+    labels = list(page('dt').contents())
+
+    try:
+        index = labels.index(label)
+    except ValueError:
+        return None
+
+    return page('dd').eq(index)
 
 
 class Metallum(object):
@@ -383,7 +396,8 @@ class Band(Metallum):
         >>> b.country
         'United States'
         """
-        return self._page('dd').eq(0)('a').text()
+        element = dd_element_for_label('Country of origin:', self._page)
+        return element.text() if element else ""
 
     @property
     def location(self) -> str:
@@ -391,7 +405,8 @@ class Band(Metallum):
         >>> b.location
         'Los Angeles/San Francisco, California'
         """
-        return self._page('dd').eq(1).text()
+        element = dd_element_for_label('Location:', self._page)
+        return element.text() if element else ""
 
     @property
     def status(self) -> str:
@@ -399,15 +414,17 @@ class Band(Metallum):
         >>> b.status
         'Active'
         """
-        return self._page('dd').eq(2).text()
+        element = dd_element_for_label('Status:', self._page)
+        return element.text() if element else ""
 
     @property
-    def formed_in(self) -> int:
+    def formed_in(self) -> str:
         """
         >>> b.formed_in
-        1981
+        '1981'
         """
-        return int(self._page('dd').eq(3).text())
+        element = dd_element_for_label('Formed in:', self._page)
+        return element.text() if element else ""
 
     @property
     def genres(self) -> List[str]:
@@ -415,7 +432,8 @@ class Band(Metallum):
         >>> b.genres
         ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
         """
-        return self._page('dd').eq(4).text().split(', ')
+        element = dd_element_for_label('Genre:', self._page)
+        return element.text().split(', ') if element else ""
 
     @property
     def themes(self) -> List[str]:
@@ -423,7 +441,8 @@ class Band(Metallum):
         >>> b.themes
         ['Corruption', 'Death', 'Life', 'Internal struggles', 'Anger']
         """
-        return self._page('dd').eq(5).text().split(', ')
+        element = dd_element_for_label('Lyrical themes:', self._page)
+        return element.text().split(', ') if element else ""
 
     @property
     def label(self) -> str:
@@ -431,10 +450,8 @@ class Band(Metallum):
         >>> b.label
         'Blackened Recordings'
         """
-        elem = self._page('dd').eq(6)
-        if elem('a'):
-            elem = elem('a')
-        return elem.text()
+        element = dd_element_for_label('Current label:', self._page)
+        return element.text() if element else ""
 
     @property
     def logo(self) -> str:
@@ -606,7 +623,8 @@ class Album(Metallum):
         >>> a.type
         'Full-length'
         """
-        return self._page('dd').eq(0).text()
+        element = dd_element_for_label('Type:', self._page)
+        return element.text() if element else ""
 
     @property
     def date(self) -> Optional[datetime.datetime]:
@@ -619,7 +637,7 @@ class Album(Metallum):
         except ImportError:
             return None
 
-        s = self._page('dd').eq(1).text()
+        s = dd_element_for_label('Release date:', self._page).text()
 
         # Date has no day portion
         if len(s) > 4 and ',' not in s:
@@ -628,6 +646,7 @@ class Album(Metallum):
             date = parser.parse(s)
         return date
 
+    # TODO: remove me
     @property
     def year(self) -> int:
         """
@@ -645,7 +664,8 @@ class Album(Metallum):
         >>> a3.label
         'Osmose Productions'
         """
-        return self._page('dd').eq(3)('a').text()
+        element = dd_element_for_label('Label:', self._page)
+        return element('a').text() if element else ""
 
     @property
     def score(self) -> Optional[int]:
@@ -659,13 +679,15 @@ class Album(Metallum):
         >>> a3.score
         97
         """
-        labels = list(self._page('dt').contents())
-        index = labels.index('Reviews:')
+        element = dd_element_for_label('Reviews:', self._page)
+        if not element:
+            return None
 
-        score = re.search('(\d{1,3})%', self._page('dd').eq(index).text())
-        if score:
-            return int(score.group(1))
-        return None
+        score = re.search('(\d{1,3})%', element.text())
+        if not score:
+            return None
+
+        return int(score.group(1))
 
     @property
     def cover(self) -> str:
