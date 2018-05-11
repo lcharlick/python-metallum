@@ -510,8 +510,8 @@ class AlbumWrapper(Metallum):
     """
 
     def __init__(self, url=None, elem=None):
-        super().__init__(url)
         if url:
+            super().__init__(url)
             self._album = Album(url)
         elif elem:
             self._album = LazyAlbum(elem)
