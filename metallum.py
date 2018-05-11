@@ -201,7 +201,7 @@ class MetallumCollection(Metallum, list):
     """Base metallum class for collections (e.g. albums)
     """
     def __init__(self, url):
-        super(MetallumCollection, self).__init__(url)
+        super().__init__(url)
 
     def search(self, **kwargs) -> 'MetallumCollection':
         """Query the collection based on one or more key value pairs, where the
@@ -227,7 +227,7 @@ class MetallumCollection(Metallum, list):
 class Search(Metallum, list):
 
     def __init__(self, url, result_handler):
-        super(Search, self).__init__(url)
+        super().__init__(url)
 
         results = json.loads(self._html)['aaData']
         for result in results:
@@ -259,7 +259,7 @@ class SearchResult(list):
 class BandResult(SearchResult):
 
     def __init__(self, details):
-        super(BandResult, self).__init__(details)
+        super().__init__(details)
         self._details = details
         self.resultType = Band
 
@@ -304,7 +304,7 @@ class BandResult(SearchResult):
 class AlbumResult(SearchResult):
 
     def __init__(self, details):
-        super(AlbumResult, self).__init__(details)
+        super().__init__(details)
         self._details = details
         self.resultType = AlbumWrapper
 
@@ -343,7 +343,7 @@ class AlbumResult(SearchResult):
 class Band(Metallum):
 
     def __init__(self, url):
-        super(Band, self).__init__(url)
+        super().__init__(url)
 
     def __repr__(self):
         return '<Band: {0}>'.format(self.name)
@@ -486,7 +486,7 @@ class Band(Metallum):
 class AlbumCollection(MetallumCollection):
 
     def __init__(self, url):
-        super(AlbumCollection, self).__init__(url)
+        super().__init__(url)
 
         rows = self._page('tr:gt(0)')
         for index, album in enumerate(rows):
@@ -551,7 +551,7 @@ class AlbumWrapper(Metallum):
 class Album(Metallum):
 
     def __init__(self, url):
-        super(Album, self).__init__(url)
+        super().__init__(url)
 
     @property
     def id(self) -> int:
@@ -730,7 +730,7 @@ class LazyAlbum:
 class TrackCollection(MetallumCollection):
 
     def __init__(self, url, album):
-        super(TrackCollection, self).__init__(url)
+        super().__init__(url)
 
         disc = 1
         overall_number = 1
@@ -878,7 +878,7 @@ class Track(object):
 class Lyrics(Metallum):
 
     def __init__(self, id):
-        super(Lyrics, self).__init__('release/ajax-view-lyrics/id/{0}'.format(id))
+        super().__init__('release/ajax-view-lyrics/id/{0}'.format(id))
 
     def __str__(self):
         lyrics = self._page('p').html()
