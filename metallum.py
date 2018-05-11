@@ -640,12 +640,12 @@ class Album(Metallum):
     def label(self) -> str:
         """
         >>> a.label
-        ''
+        'Elektra Records'
 
         >>> a3.label
         'Osmose Productions'
         """
-        return self._page('dd').eq(2)('a').text()
+        return self._page('dd').eq(3)('a').text()
 
     @property
     def score(self) -> Optional[int]:
