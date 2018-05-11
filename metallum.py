@@ -151,24 +151,6 @@ def offset_time(t: datetime.datetime) -> datetime.datetime:
     return t + td
 
 
-def dd_element_for_label(label: str, page: PyQuery) -> Optional[PyQuery]:
-    """Data on entity pages are stored in <dt> / <dd> pairs
-    """
-    labels = list(page('dt').contents())
-
-    try:
-        index = labels.index(label)
-    except ValueError:
-        return None
-
-    return page('dd').eq(index)
-
-
-def dd_text_for_label(label: str, page: PyQuery) -> str:
-    element = dd_element_for_label(label, page)
-    return element.text() if element else ""
-
-
 class Metallum(object):
     """Base metallum class - represents a metallum page
     """
@@ -197,6 +179,26 @@ class Metallum(object):
     def _fetch_page(self, url) -> bytes:
         res = self._session.get(make_absolute(url))
         return res.content
+
+
+class MetallumEntity(Metallum):
+    """Represents a metallum entity (artist, album...)
+    """
+    def _dd_element_for_label(self, label: str) -> Optional[PyQuery]:
+        """Data on entity pages are stored in <dt> / <dd> pairs
+        """
+        labels = list(self._page('dt').contents())
+
+        try:
+            index = labels.index(label)
+        except ValueError:
+            return None
+
+        return self._page('dd').eq(index)
+
+    def _dd_text_for_label(self, label: str) -> str:
+        element = self._dd_element_for_label(label)
+        return element.text() if element else ""
 
 
 class MetallumCollection(Metallum, list):
@@ -342,7 +344,7 @@ class AlbumResult(SearchResult):
         return self[0]
 
 
-class Band(Metallum):
+class Band(MetallumEntity):
 
     def __init__(self, url):
         super().__init__(url)
@@ -401,7 +403,7 @@ class Band(Metallum):
         >>> b.country
         'United States'
         """
-        return dd_text_for_label('Country of origin:', self._page)
+        return self._dd_text_for_label('Country of origin:')
 
     @property
     def location(self) -> str:
@@ -409,7 +411,7 @@ class Band(Metallum):
         >>> b.location
         'Los Angeles/San Francisco, California'
         """
-        return dd_text_for_label('Location:', self._page)
+        return self._dd_text_for_label('Location:')
 
     @property
     def status(self) -> str:
@@ -417,7 +419,7 @@ class Band(Metallum):
         >>> b.status
         'Active'
         """
-        return dd_text_for_label('Status:', self._page)
+        return self._dd_text_for_label('Status:')
 
     @property
     def formed_in(self) -> str:
@@ -425,7 +427,7 @@ class Band(Metallum):
         >>> b.formed_in
         '1981'
         """
-        return dd_text_for_label('Formed in:', self._page)
+        return self._dd_text_for_label('Formed in:')
 
     @property
     def genres(self) -> List[str]:
@@ -433,7 +435,7 @@ class Band(Metallum):
         >>> b.genres
         ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
         """
-        return dd_text_for_label('Genre:', self._page).split(', ')
+        return self._dd_text_for_label('Genre:').split(', ')
 
     @property
     def themes(self) -> List[str]:
@@ -441,7 +443,7 @@ class Band(Metallum):
         >>> b.themes
         ['Corruption', 'Death', 'Life', 'Internal struggles', 'Anger']
         """
-        return dd_text_for_label('Lyrical themes:', self._page).split(', ')
+        return self._dd_text_for_label('Lyrical themes:').split(', ')
 
     @property
     def label(self) -> str:
@@ -449,7 +451,7 @@ class Band(Metallum):
         >>> b.label
         'Blackened Recordings'
         """
-        return dd_text_for_label('Current label:', self._page)
+        return self._dd_text_for_label('Current label:')
 
     @property
     def logo(self) -> str:
@@ -547,7 +549,7 @@ class AlbumWrapper(Metallum):
         return discs
 
 
-class Album(Metallum):
+class Album(MetallumEntity):
 
     def __init__(self, url):
         super().__init__(url)
@@ -621,7 +623,7 @@ class Album(Metallum):
         >>> a.type
         'Full-length'
         """
-        element = dd_element_for_label('Type:', self._page)
+        element = self._dd_element_for_label('Type:')
         return element.text() if element else ""
 
     @property
@@ -635,7 +637,7 @@ class Album(Metallum):
         except ImportError:
             return None
 
-        s = dd_text_for_label('Release date:', self._page)
+        s = self._dd_text_for_label('Release date:')
 
         # Date has no day portion
         if len(s) > 4 and ',' not in s:
@@ -662,7 +664,7 @@ class Album(Metallum):
         >>> a3.label
         'Osmose Productions'
         """
-        element = dd_element_for_label('Label:', self._page)
+        element = self._dd_element_for_label('Label:')
         return element('a').text() if element else ""
 
     @property
@@ -677,7 +679,7 @@ class Album(Metallum):
         >>> a3.score
         97
         """
-        element = dd_element_for_label('Reviews:', self._page)
+        element = self._dd_element_for_label('Reviews:')
         if not element:
             return None
 
