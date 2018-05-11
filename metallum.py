@@ -651,9 +651,18 @@ class Album(Metallum):
     def score(self) -> Optional[int]:
         """
         >>> a.score
-        79
+        78
+
+        >>> a2.score
+        94
+
+        >>> a3.score
+        97
         """
-        score = re.search('(\d{1,2})%', self._page('dd').eq(3).text())
+        labels = list(self._page('dt').contents())
+        index = labels.index('Reviews:')
+
+        score = re.search('(\d{1,3})%', self._page('dd').eq(index).text())
         if score:
             return int(score.group(1))
         return None
