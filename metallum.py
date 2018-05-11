@@ -9,11 +9,15 @@ import time
 import random
 import datetime
 import requests
+import requests_cache
 
 from typing import List, Optional
 from pyquery import PyQuery
 from urllib.parse import urlencode
+from requests_cache.core import remove_expired_responses
 
+requests_cache.install_cache('cache', expire_after=30)
+remove_expired_responses()
 
 # Site details
 BASE_URL = 'https://www.metal-archives.com'
@@ -22,9 +26,6 @@ ENC = 'utf8'
 # HTML entities
 BR = '<br/>'
 CR = '&#13;'
-
-# Cache expiry time, in seconds
-CACHE_EXPIRY = 600
 
 # Min / max timeout between page requests, in seconds
 REQUEST_TIMEOUT = (3.0, 5.0)
@@ -152,48 +153,33 @@ def offset_time(t: datetime.datetime) -> datetime.datetime:
     return t + td
 
 
-class cache(object):
-    def __init__(self, expiry=0):
-        self.store = {}
-        self.expiry = expiry
-
-    def __call__(self, func):
-        def _cache(obj, url):
-            if url in self.store:
-                t, result = self.store[url]
-                if self.expiry and (time.time() - t) < self.expiry:
-                    return self.store[url][1]
-            result = func(obj, url)
-            self.store[url] = (time.time(), result)
-            return result
-        return _cache
-
-
 class Metallum(object):
     """Base metallum class - represents a metallum page
     """
     _last_request = None
 
     def __init__(self, url):
+        self._session = requests_cache.CachedSession()
+        self._session.hooks = {'response': self._make_throttle_hook()}
+
         self._html = self._fetch_page(url)
         self._page = PyQuery(self._html)
 
-    @cache(CACHE_EXPIRY)
+    def _make_throttle_hook(self, timeout=1.0):
+        """
+        Returns a response hook function which sleeps for `timeout` seconds if
+        response is not cached
+        """
+        def hook(response, *args, **kwargs):
+            is_cached = getattr(response, 'from_cache', False)
+            if not is_cached:
+                time.sleep(timeout)
+            print("{}{}".format(response.request.url, " (CACHED)" if is_cached else ""))
+            return response
+        return hook
+
     def _fetch_page(self, url) -> bytes:
-        # Throttle requests
-        if Metallum._last_request:
-            delta = time.time() - Metallum._last_request
-            timeout = random.uniform(*REQUEST_TIMEOUT)
-            if delta < timeout:
-                time.sleep(timeout - delta)
-        Metallum._last_request = time.time()
-
-        # print(url)
-        try:
-            res = requests.get(make_absolute(url))
-        except requests.exceptions.RequestException as e:
-            raise NetworkError(e)
-
+        res = self._session.get(make_absolute(url))
         return res.content
 
 
