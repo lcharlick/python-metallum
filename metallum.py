@@ -172,7 +172,7 @@ class Metallum(object):
             is_cached = getattr(response, 'from_cache', False)
             if not is_cached:
                 time.sleep(REQUEST_TIMEOUT)
-            print("{}{}".format(response.request.url, " (CACHED)" if is_cached else ""))
+            # print("{}{}".format(response.request.url, " (CACHED)" if is_cached else ""))
             return response
         return hook
 
