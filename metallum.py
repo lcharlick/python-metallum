@@ -11,6 +11,7 @@ from typing import List, Optional
 from urllib.parse import urlencode
 
 import requests_cache
+from dateutil import parser as date_parser
 from pyquery import PyQuery
 from requests_cache.core import remove_expired_responses
 
@@ -632,28 +633,22 @@ class Album(MetallumEntity):
         >>> a.date
         datetime.datetime(1986, 3, 3, 0, 0)
         """
-        try:
-            from dateutil import parser
-        except ImportError:
-            return None
-
         s = self._dd_text_for_label('Release date:')
 
         # Date has no day portion
         if len(s) > 4 and ',' not in s:
             date = datetime.datetime.strptime(s, '%B %Y')
         else:
-            date = parser.parse(s)
+            date = date_parser.parse(s)
         return date
 
-    # TODO: remove me
     @property
     def year(self) -> int:
         """
         >>> a.year
         1986
         """
-        return int(self._page('dd').eq(1).text()[-4:])
+        return int(self.date.year)
 
     @property
     def label(self) -> str:
