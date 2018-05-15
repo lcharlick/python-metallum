@@ -311,7 +311,7 @@ class AlbumResult(SearchResult):
     def __init__(self, details):
         super().__init__(details)
         self._details = details
-        self.resultType = AlbumWrapper
+        self._resultType = AlbumWrapper
 
     @property
     def id(self) -> str:
