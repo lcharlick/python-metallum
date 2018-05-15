@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='python-metallum',
-    version='1.0.1',
+    version='1.0.2',
     author='Lachlan Charlick',
     author_email='lachlan.charlick@gmail.com',
     url='https://github.com/lcharlick/python-metallum',
