@@ -7,6 +7,8 @@ import datetime
 import json
 import re
 import time
+import os.path
+import tempfile
 from typing import List, Optional
 from urllib.parse import urlencode
 
@@ -15,7 +17,7 @@ from dateutil import parser as date_parser
 from pyquery import PyQuery
 from requests_cache.core import remove_expired_responses
 
-requests_cache.install_cache('cache', expire_after=300)
+requests_cache.install_cache(os.path.join(tempfile.gettempdir(), 'metallum_cache'), expire_after=300)
 remove_expired_responses()
 
 # Site details
