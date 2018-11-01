@@ -53,7 +53,8 @@ def band_for_id(id: str) -> 'Band':
 
 
 def band_search(name, strict=True, genre=None, countries=[], year_created_from=None,
-                year_created_to=None, status=[], themes=None, location=None, label=None) -> 'Search':
+                year_created_to=None, status=[], themes=None, location=None, label=None,
+                page_start=0) -> 'Search':
     """Perform an advanced band search.
     """
     # Create a dict from the method arguments
@@ -70,7 +71,8 @@ def band_search(name, strict=True, genre=None, countries=[], year_created_from=N
         'year_created_from': 'yearCreationFrom',
         'year_created_to': 'yearCreationTo',
         'status': 'status[]',
-        'label': 'bandLabelName'
+        'label': 'bandLabelName',
+        'page_start': 'iDisplayStart'
     })
 
     # Build the search URL
@@ -85,7 +87,7 @@ def album_for_id(id: str) -> 'AlbumWrapper':
 
 def album_search(title, strict=True, band=None, band_strict=True, year_from=None,
                  year_to=None, month_from=None, month_to=None, countries=[], location=None, label=None,
-                 indie_label=False, genre=None, types=[]) -> 'Search':
+                 indie_label=False, genre=None, types=[], page_start=0) -> 'Search':
     """Perform an advanced album search
     """
     # Create a dict from the method arguments
@@ -115,7 +117,8 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
         'countries': 'country[]',
         'label': 'releaseLabelName',
         'indie_label': 'indieLabel',
-        'types': 'releaseType[]'
+        'types': 'releaseType[]',
+        'page_start': 'iDisplayStart'
     })
 
     # Build the search URL
@@ -238,9 +241,12 @@ class Search(Metallum, list):
     def __init__(self, url, result_handler):
         super().__init__(url)
 
-        results = json.loads(self._html)['aaData']
+        data = json.loads(self._html)
+        results = data['aaData']
         for result in results:
             self.append(result_handler(result))
+
+        self.result_count = int(data['iTotalRecords'])
 
 
 class SearchResult(list):
