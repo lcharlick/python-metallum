@@ -17,7 +17,8 @@ from dateutil import parser as date_parser
 from pyquery import PyQuery
 from requests_cache.core import remove_expired_responses
 
-requests_cache.install_cache(os.path.join(tempfile.gettempdir(), 'metallum_cache'), expire_after=300)
+CACHE_FILE=os.path.join(tempfile.gettempdir(), 'metallum_cache')
+requests_cache.install_cache(cache_name=CACHE_FILE, expire_after=300)
 remove_expired_responses()
 
 # Site details
@@ -164,7 +165,7 @@ class Metallum(object):
     _last_request = None
 
     def __init__(self, url):
-        self._session = requests_cache.CachedSession()
+        self._session = requests_cache.CachedSession(cache_name=CACHE_FILE)
         self._session.hooks = {'response': self._make_throttle_hook()}
         self._session.headers = {'User-Agent': USER_AGENT}
 
