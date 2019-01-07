@@ -5,3 +5,6 @@ __pycache__/
 .idea
 venv*
 cache.sqlite
+*.egg-info
+/build
+/dist
