@@ -17,7 +17,7 @@ from dateutil import parser as date_parser
 from pyquery import PyQuery
 from requests_cache.core import remove_expired_responses
 
-CACHE_FILE=os.path.join(tempfile.gettempdir(), 'metallum_cache')
+CACHE_FILE = os.path.join(tempfile.gettempdir(), 'metallum_cache')
 requests_cache.install_cache(cache_name=CACHE_FILE, expire_after=300)
 remove_expired_responses()
 
