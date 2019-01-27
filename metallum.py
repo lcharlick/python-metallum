@@ -132,6 +132,23 @@ def lyrics_for_id(id: int) -> 'Lyrics':
     return Lyrics(id)
 
 
+def split_genres(s: str) -> List[str]:
+    """
+    Split by comma separator:
+    >>> split_genres('Thrash Metal (early), Hard Rock/Heavy/Thrash Metal (later)')
+    ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
+
+    Handle no commas:
+    >>> split_genres('Heavy Metal')
+    ['Heavy Metal']
+
+    Handle commas within parentheses:
+    >>> split_genres('Heavy Metal/Hard Rock (early, later), Thrash Metal (mid)')
+    ['Heavy Metal/Hard Rock (early, later)', 'Thrash Metal (mid)']
+    """
+    return re.split(r',\s*(?![^()]*\))', s)
+
+
 class AlbumTypes(object):
     """Enum of all possible album types
     """
@@ -306,7 +323,7 @@ class BandResult(SearchResult):
         >>> s[0].genres
         ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
         """
-        return self[1].split(', ')
+        return split_genres(self[1])
 
     @property
     def country(self) -> str:
@@ -447,7 +464,7 @@ class Band(MetallumEntity):
         >>> b.genres
         ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
         """
-        return self._dd_text_for_label('Genre:').split(', ')
+        return split_genres(self._dd_text_for_label('Genre:'))
 
     @property
     def themes(self) -> List[str]:
