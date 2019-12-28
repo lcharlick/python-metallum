@@ -184,7 +184,10 @@ class Metallum(object):
     def __init__(self, url):
         self._session = requests_cache.CachedSession(cache_name=CACHE_FILE)
         self._session.hooks = {'response': self._make_throttle_hook()}
-        self._session.headers = {'User-Agent': USER_AGENT}
+        self._session.headers = {
+            'User-Agent': USER_AGENT,
+            'Accept-Encoding': 'gzip'
+        }
 
         self._html = self._fetch_page(url)
         self._page = PyQuery(self._html)
