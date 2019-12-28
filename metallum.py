@@ -175,6 +175,24 @@ def offset_time(t: datetime.datetime) -> datetime.datetime:
     return t + td
 
 
+def parse_duration(s: str) -> int:
+    """
+    >>> parse_duration('00:01')
+    1
+    >>> parse_duration('03:33')
+    213
+    >>> parse_duration('01:14:00')
+    4440
+    """
+    parts = s.split(':')
+    seconds = int(parts[-1])
+    if len(parts) > 1:
+        seconds += int(parts[-2]) * 60
+    if len(parts) == 3:
+        seconds += int(parts[0]) * 3600
+    return seconds
+
+
 class Metallum(object):
     """Base metallum class - represents a metallum page
     """
@@ -656,6 +674,18 @@ class Album(MetallumEntity):
         return element.text() if element else ""
 
     @property
+    def duration(self) -> int:
+        """
+        >>> a.duration
+        3290
+        """
+        s = self._page('table.table_lyrics td strong').text()
+        if s:
+            return parse_duration(s)
+        else:
+            return 0
+
+    @property
     def date(self) -> Optional[datetime.datetime]:
         """
         >>> a.date
@@ -877,12 +907,7 @@ class Track(object):
         """
         s = self._elem('td').eq(2).text()
         if s:
-            parts = s.split(':')
-            seconds = int(parts[-1])
-            if len(parts) > 1:
-                seconds += int(parts[-2]) * 60
-            if len(parts) == 3:
-                seconds += int(parts[0]) * 3600
+            seconds = parse_duration(s)
         else:
             seconds = 0
         return seconds
