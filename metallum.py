@@ -204,8 +204,8 @@ class Metallum(object):
             'Accept-Encoding': 'gzip'
         }
 
-        self._html = self._fetch_page(url)
-        self._page = PyQuery(self._html)
+        self._content = self._fetch_page_content(url)
+        self._page = PyQuery(self._content)
 
     def _make_throttle_hook(self):
         """
@@ -220,7 +220,7 @@ class Metallum(object):
             return response
         return hook
 
-    def _fetch_page(self, url) -> bytes:
+    def _fetch_page_content(self, url) -> str:
         res = self._session.get(make_absolute(url))
         return res.text
 
@@ -277,7 +277,7 @@ class Search(Metallum, list):
     def __init__(self, url, result_handler):
         super().__init__(url)
 
-        data = json.loads(self._html)
+        data = json.loads(self._content)
         results = data['aaData']
         for result in results:
             self.append(result_handler(result))
