@@ -204,7 +204,7 @@ class Metallum(object):
 
     def _fetch_page(self, url) -> bytes:
         res = self._session.get(make_absolute(url))
-        return res.content
+        return res.text
 
 
 class MetallumEntity(Metallum):
