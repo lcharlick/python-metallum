@@ -324,7 +324,7 @@ class BandResult(SearchResult):
     def genres(self) -> List[str]:
         """
         >>> s[0].genres
-        ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
+        ['Thrash Metal (early)', 'Hard Rock (mid)', 'Heavy/Thrash Metal (later)']
         """
         return split_genres(self[1])
 
@@ -465,7 +465,7 @@ class Band(MetallumEntity):
     def genres(self) -> List[str]:
         """
         >>> b.genres
-        ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
+        ['Thrash Metal (early)', 'Hard Rock (mid)', 'Heavy/Thrash Metal (later)']
         """
         return split_genres(self._dd_text_for_label('Genre:'))
 
@@ -697,7 +697,7 @@ class Album(MetallumEntity):
     def score(self) -> Optional[int]:
         """
         >>> a.score
-        78
+        79
 
         >>> a2.score
         94
