@@ -501,22 +501,26 @@ class Band(MetallumEntity):
         return self._dd_text_for_label('Current label:')
 
     @property
-    def logo(self) -> str:
+    def logo(self) -> Optional[str]:
         """
         >>> b.logo
         'https://www.metal-archives.com/images/1/2/5/125_logo.png'
         """
         url = self._page('#logo').attr('href')
-        return url[:url.find('?')]
+        if not url:
+            return None
+        return url.split("?")[0]
 
     @property
-    def photo(self) -> str:
+    def photo(self) -> Optional[str]:
         """
         >>> b.photo
         'https://www.metal-archives.com/images/1/2/5/125_photo.jpg'
         """
         url = self._page('#photo').attr('href')
-        return url[:url.find('?')]
+        if not url:
+            return None
+        return url.split("?")[0]
 
     @property
     def albums(self) -> List['AlbumCollection']:
@@ -743,13 +747,15 @@ class Album(MetallumEntity):
         return int(score.group(1))
 
     @property
-    def cover(self) -> str:
+    def cover(self) -> Optional[str]:
         """
         >>> a.cover
         'https://www.metal-archives.com/images/5/4/7/547.jpg'
         """
         url = self._page('#cover').attr('href')
-        return url[:url.find('?')]
+        if not url:
+            return None
+        return url.split("?")[0]
 
 
 class LazyAlbum:
