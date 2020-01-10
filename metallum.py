@@ -321,7 +321,7 @@ class BandResult(SearchResult):
         '125'
         """
         url = PyQuery(self._details[0])('a').attr('href')
-        return re.search('\d+$', url).group(0)
+        return re.search(r'\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -362,7 +362,7 @@ class AlbumResult(SearchResult):
     @property
     def id(self) -> str:
         url = PyQuery(self._details[1])('a').attr('href')
-        return re.search('\d+$', url).group(0)
+        return re.search(r'\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -382,7 +382,7 @@ class AlbumResult(SearchResult):
         el = PyQuery(self._details[0]).wrap('<div></div>')
         for a in el.find('a'):
             url = PyQuery(a).attr('href')
-            id = re.search('\d+$', url).group(0)
+            id = re.search(r'\d+$', url).group(0)
             bands.append(Band('bands/_/{0}'.format(id)))
         return bands
 
@@ -406,7 +406,7 @@ class Band(MetallumEntity):
         '125'
         """
         url = self._page('.band_name a').attr('href')
-        return re.search('\d+$', url).group(0)
+        return re.search(r'\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -612,7 +612,7 @@ class Album(MetallumEntity):
         '547'
         """
         url = self._page('.album_name a').attr('href')
-        return re.search('\d+$', url).group(0)
+        return re.search(r'\d+$', url).group(0)
 
     @property
     def url(self) -> str:
@@ -632,7 +632,7 @@ class Album(MetallumEntity):
         bands = []
         for a in self._page('.band_name').find('a'):
             url = PyQuery(a).attr('href')
-            id = re.search('\d+$', url).group(0)
+            id = re.search(r'\d+$', url).group(0)
             bands.append(Band('bands/_/{0}'.format(id)))
         return bands
 
@@ -743,7 +743,7 @@ class Album(MetallumEntity):
         if not element:
             return None
 
-        score = re.search('(\d{1,3})%', element.text())
+        score = re.search(r'(\d{1,3})%', element.text())
         if not score:
             return None
 
@@ -765,7 +765,7 @@ class Album(MetallumEntity):
         if not element:
             return None
 
-        count = re.search('(\d+)', element.text())
+        count = re.search(r'(\d+)', element.text())
         if not count:
             return None
 
@@ -795,7 +795,7 @@ class LazyAlbum:
         '547'
         """
         url = self._elem('td').eq(0)('a').attr('href')
-        return re.search('\d+$', url).group(0)
+        return re.search(r'\d+$', url).group(0)
 
     @property
     def url(self) -> str:
