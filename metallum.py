@@ -317,7 +317,7 @@ class BandResult(SearchResult):
     @property
     def id(self) -> str:
         """
-        >>> s[0].id
+        >>> search_results[0].id
         '125'
         """
         url = PyQuery(self._details[0])('a').attr('href')
@@ -330,7 +330,7 @@ class BandResult(SearchResult):
     @property
     def name(self) -> str:
         """
-        >>> s[0].name
+        >>> search_results[0].name
         'Metallica'
         """
         return self[0]
@@ -338,7 +338,7 @@ class BandResult(SearchResult):
     @property
     def genres(self) -> List[str]:
         """
-        >>> s[0].genres
+        >>> search_results[0].genres
         ['Thrash Metal (early)', 'Hard Rock (mid)', 'Heavy/Thrash Metal (later)']
         """
         return split_genres(self[1])
@@ -346,7 +346,7 @@ class BandResult(SearchResult):
     @property
     def country(self) -> str:
         """
-        >>> s[0].country
+        >>> search_results[0].country
         'United States'
         """
         return self[2]
