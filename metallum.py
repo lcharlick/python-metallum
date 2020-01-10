@@ -724,6 +724,9 @@ class Album(MetallumEntity):
         element = self._dd_element_for_label('Label:')
         return element('a').text() if element else ""
 
+    def _review_element(self) -> Optional[PyQuery]:
+        return self._dd_element_for_label('Reviews:')
+
     @property
     def score(self) -> Optional[int]:
         """
@@ -736,7 +739,7 @@ class Album(MetallumEntity):
         >>> a3.score
         97
         """
-        element = self._dd_element_for_label('Reviews:')
+        element = self._review_element()
         if not element:
             return None
 
@@ -745,6 +748,28 @@ class Album(MetallumEntity):
             return None
 
         return int(score.group(1))
+
+    @property
+    def review_count(self) -> Optional[int]:
+        """
+        >>> a.review_count
+        39
+
+        >>> a2.review_count
+        1
+
+        >>> a3.review_count
+        4
+        """
+        element = self._review_element()
+        if not element:
+            return None
+
+        count = re.search('(\d+)', element.text())
+        if not count:
+            return None
+
+        return int(count.group(1))
 
     @property
     def cover(self) -> Optional[str]:
