@@ -36,10 +36,6 @@ REQUEST_TIMEOUT = 1.0
 UTC_OFFSET = 4
 
 
-class NetworkError(Exception):
-    """Exception conveying a problem in sending a request"""
-
-
 def map_params(params, m):
     res = {}
     for k, v in params.items():
