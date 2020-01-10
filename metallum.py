@@ -255,10 +255,10 @@ class MetallumCollection(Metallum, list):
         """Query the collection based on one or more key value pairs, where the
         keys are attributes of the contained objects:
 
-        >>> len(b.albums.search(title='master of puppets'))
+        >>> len(band.albums.search(title='master of puppets'))
         2
 
-        >>> len(b.albums.search(title='master of puppets', type=AlbumTypes.FULL_LENGTH))
+        >>> len(band.albums.search(title='master of puppets', type=AlbumTypes.FULL_LENGTH))
         1
         """
         collection = self[:]
@@ -402,7 +402,7 @@ class Band(MetallumEntity):
     @property
     def id(self) -> str:
         """
-        >>> b.id
+        >>> band.id
         '125'
         """
         url = self._page('.band_name a').attr('href')
@@ -415,7 +415,7 @@ class Band(MetallumEntity):
     @property
     def added(self) -> Optional[datetime.datetime]:
         """
-        >>> type(b.added)
+        >>> type(band.added)
         <class 'datetime.datetime'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(0).text()[10:]
@@ -427,7 +427,7 @@ class Band(MetallumEntity):
     @property
     def modified(self) -> Optional[datetime.datetime]:
         """
-        >>> type(b.modified)
+        >>> type(band.modified)
         <class 'datetime.datetime'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(1).text()[18:]
@@ -439,7 +439,7 @@ class Band(MetallumEntity):
     @property
     def name(self) -> str:
         """
-        >>> b.name
+        >>> band.name
         'Metallica'
         """
         return self._page('h1.band_name').text().strip()
@@ -447,7 +447,7 @@ class Band(MetallumEntity):
     @property
     def country(self) -> str:
         """
-        >>> b.country
+        >>> band.country
         'United States'
         """
         return self._dd_text_for_label('Country of origin:')
@@ -455,7 +455,7 @@ class Band(MetallumEntity):
     @property
     def location(self) -> str:
         """
-        >>> b.location
+        >>> band.location
         'Los Angeles/San Francisco, California'
         """
         return self._dd_text_for_label('Location:')
@@ -463,7 +463,7 @@ class Band(MetallumEntity):
     @property
     def status(self) -> str:
         """
-        >>> b.status
+        >>> band.status
         'Active'
         """
         return self._dd_text_for_label('Status:')
@@ -471,7 +471,7 @@ class Band(MetallumEntity):
     @property
     def formed_in(self) -> str:
         """
-        >>> b.formed_in
+        >>> band.formed_in
         '1981'
         """
         return self._dd_text_for_label('Formed in:')
@@ -479,7 +479,7 @@ class Band(MetallumEntity):
     @property
     def genres(self) -> List[str]:
         """
-        >>> b.genres
+        >>> band.genres
         ['Thrash Metal (early)', 'Hard Rock (mid)', 'Heavy/Thrash Metal (later)']
         """
         return split_genres(self._dd_text_for_label('Genre:'))
@@ -487,7 +487,7 @@ class Band(MetallumEntity):
     @property
     def themes(self) -> List[str]:
         """
-        >>> b.themes
+        >>> band.themes
         ['Corruption', 'Death', 'Life', 'Internal struggles', 'Anger']
         """
         return self._dd_text_for_label('Lyrical themes:').split(', ')
@@ -495,7 +495,7 @@ class Band(MetallumEntity):
     @property
     def label(self) -> str:
         """
-        >>> b.label
+        >>> band.label
         'Blackened Recordings'
         """
         return self._dd_text_for_label('Current label:')
@@ -503,7 +503,7 @@ class Band(MetallumEntity):
     @property
     def logo(self) -> Optional[str]:
         """
-        >>> b.logo
+        >>> band.logo
         'https://www.metal-archives.com/images/1/2/5/125_logo.png'
         """
         url = self._page('#logo').attr('href')
@@ -514,7 +514,7 @@ class Band(MetallumEntity):
     @property
     def photo(self) -> Optional[str]:
         """
-        >>> b.photo
+        >>> band.photo
         'https://www.metal-archives.com/images/1/2/5/125_photo.jpg'
         """
         url = self._page('#photo').attr('href')
@@ -525,10 +525,10 @@ class Band(MetallumEntity):
     @property
     def albums(self) -> List['AlbumCollection']:
         """
-        >>> len(b.albums) > 0
+        >>> len(band.albums) > 0
         True
 
-        >>> type(b.albums[0])
+        >>> type(band.albums[0])
         <class '__main__.AlbumWrapper'>
         """
         url = 'band/discography/id/{0}/tab/all'.format(self.id)
@@ -551,7 +551,7 @@ class AlbumWrapper(Metallum):
     Album instances are created automatically when an attribute is accessed that
     is not provided by LazyAlbum:
 
-    >>> a = b.albums[1]
+    >>> a = band.albums[1]
     >>> a.label
     'Megaforce Records'
 
@@ -579,7 +579,7 @@ class AlbumWrapper(Metallum):
     @property
     def tracks(self):
         """
-        >>> len(a.tracks)
+        >>> len(album.tracks)
         8
         """
         return TrackCollection(self._album.url, self)
@@ -587,10 +587,10 @@ class AlbumWrapper(Metallum):
     @property
     def disc_count(self):
         """
-        >>> a.disc_count
+        >>> album.disc_count
         1
 
-        >>> a3.disc_count
+        >>> multi_disc_album.disc_count
         2
         """
         discs = 0
@@ -608,7 +608,7 @@ class Album(MetallumEntity):
     @property
     def id(self) -> str:
         """
-        >>> a.id
+        >>> album.id
         '547'
         """
         url = self._page('.album_name a').attr('href')
@@ -623,10 +623,10 @@ class Album(MetallumEntity):
         """Return a list of band objects. The list will only contain
         multiple bands when the album is of type 'Split'.
 
-        >>> a.bands
+        >>> album.bands
         [<Band: Metallica>]
 
-        >>> a2.bands
+        >>> split_album.bands
         [<Band: Lunar Aurora>, <Band: Paysage d'Hiver>]
         """
         bands = []
@@ -639,7 +639,7 @@ class Album(MetallumEntity):
     @property
     def added(self) -> Optional[datetime.datetime]:
         """
-        >>> type(a.added)
+        >>> type(album.added)
         <class 'NoneType'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(0).text()[10:]
@@ -651,7 +651,7 @@ class Album(MetallumEntity):
     @property
     def modified(self) -> Optional[datetime.datetime]:
         """
-        >>> type(a.modified)
+        >>> type(album.modified)
         <class 'datetime.datetime'>
         """
         s = self._page('#auditTrail').find('tr').eq(1).find('td').eq(1).text()[18:]
@@ -663,7 +663,7 @@ class Album(MetallumEntity):
     @property
     def title(self) -> str:
         """
-        >>> a.title
+        >>> album.title
         'Master of Puppets'
         """
         return self._page('h1.album_name a').text()
@@ -671,7 +671,7 @@ class Album(MetallumEntity):
     @property
     def type(self) -> str:
         """
-        >>> a.type
+        >>> album.type
         'Full-length'
         """
         element = self._dd_element_for_label('Type:')
@@ -680,7 +680,7 @@ class Album(MetallumEntity):
     @property
     def duration(self) -> int:
         """
-        >>> a.duration
+        >>> album.duration
         3290
         """
         s = self._page('table.table_lyrics td strong').text()
@@ -692,7 +692,7 @@ class Album(MetallumEntity):
     @property
     def date(self) -> Optional[datetime.datetime]:
         """
-        >>> a.date
+        >>> album.date
         datetime.datetime(1986, 3, 3, 0, 0)
         """
         s = self._dd_text_for_label('Release date:')
@@ -707,7 +707,7 @@ class Album(MetallumEntity):
     @property
     def year(self) -> int:
         """
-        >>> a.year
+        >>> album.year
         1986
         """
         return int(self.date.year)
@@ -715,10 +715,10 @@ class Album(MetallumEntity):
     @property
     def label(self) -> str:
         """
-        >>> a.label
+        >>> album.label
         'Elektra Records'
 
-        >>> a3.label
+        >>> multi_disc_album.label
         'Osmose Productions'
         """
         element = self._dd_element_for_label('Label:')
@@ -730,13 +730,13 @@ class Album(MetallumEntity):
     @property
     def score(self) -> Optional[int]:
         """
-        >>> a.score
+        >>> album.score
         79
 
-        >>> a2.score
+        >>> split_album.score
         94
 
-        >>> a3.score
+        >>> multi_disc_album.score
         97
         """
         element = self._review_element()
@@ -752,13 +752,13 @@ class Album(MetallumEntity):
     @property
     def review_count(self) -> Optional[int]:
         """
-        >>> a.review_count
+        >>> album.review_count
         39
 
-        >>> a2.review_count
+        >>> split_album.review_count
         1
 
-        >>> a3.review_count
+        >>> multi_disc_album.review_count
         4
         """
         element = self._review_element()
@@ -774,7 +774,7 @@ class Album(MetallumEntity):
     @property
     def cover(self) -> Optional[str]:
         """
-        >>> a.cover
+        >>> album.cover
         'https://www.metal-archives.com/images/5/4/7/547.jpg'
         """
         url = self._page('#cover').attr('href')
@@ -791,7 +791,7 @@ class LazyAlbum:
     @property
     def id(self) -> str:
         """
-        >>> a.id
+        >>> album.id
         '547'
         """
         url = self._elem('td').eq(0)('a').attr('href')
@@ -804,7 +804,7 @@ class LazyAlbum:
     @property
     def title(self) -> str:
         """
-        >>> a.title
+        >>> album.title
         'Master of Puppets'
         """
         return self._elem('td').eq(0)('a').text()
@@ -812,7 +812,7 @@ class LazyAlbum:
     @property
     def type(self) -> str:
         """
-        >>> a.type
+        >>> album.type
         'Full-length'
         """
         return self._elem('td').eq(1).text()
@@ -820,7 +820,7 @@ class LazyAlbum:
     @property
     def year(self) -> int:
         """
-        >>> a.year
+        >>> album.year
         1986
         """
         return int(self._elem('td').eq(2).text())
@@ -857,7 +857,7 @@ class Track(object):
     @property
     def id(self) -> str:
         """
-        >>> t.id
+        >>> track.id
         '5018A'
         """
         return self._elem('td').eq(0)('a').attr('name')
@@ -865,13 +865,13 @@ class Track(object):
     @property
     def number(self) -> int:
         """
-        >>> t.number
+        >>> track.number
         1
 
-        >>> a3.tracks[0].number
+        >>> multi_disc_album.tracks[0].number
         1
 
-        >>> a3.tracks[-1].number
+        >>> multi_disc_album.tracks[-1].number
         4
         """
         return int(self._elem('td').eq(0).text()[:-1])
@@ -879,13 +879,13 @@ class Track(object):
     @property
     def overall_number(self) -> int:
         """
-        >>> t.overall_number
+        >>> track.overall_number
         1
 
-        >>> a3.tracks[0].overall_number
+        >>> multi_disc_album.tracks[0].overall_number
         1
 
-        >>> a3.tracks[-1].overall_number
+        >>> multi_disc_album.tracks[-1].overall_number
         8
         """
         return self._overall_number
@@ -893,13 +893,13 @@ class Track(object):
     @property
     def disc_number(self) -> int:
         """
-        >>> t.disc_number
+        >>> track.disc_number
         1
 
-        >>> a3.tracks[0].disc_number
+        >>> multi_disc_album.tracks[0].disc_number
         1
 
-        >>> a3.tracks[-1].disc_number
+        >>> multi_disc_album.tracks[-1].disc_number
         2
         """
         return self._disc_number
@@ -907,10 +907,10 @@ class Track(object):
     @property
     def full_title(self) -> str:
         """
-        >>> t.full_title
+        >>> track.full_title
         'Battery'
 
-        >>> t2.full_title
+        >>> split_album_track.full_title
         'Lunar Aurora - A haudiga Fluag'
         """
         return self._elem('td').eq(1).text().replace('\n', '').replace('\t', '')
@@ -918,10 +918,10 @@ class Track(object):
     @property
     def title(self) -> str:
         """
-        >>> t.title
+        >>> track.title
         'Battery'
 
-        >>> t2.title
+        >>> split_album_track.title
         'A haudiga Fluag'
         """
         title = self.full_title
@@ -933,7 +933,7 @@ class Track(object):
     @property
     def duration(self) -> int:
         """
-        >>> t.duration
+        >>> track.duration
         313
         """
         s = self._elem('td').eq(2).text()
@@ -946,10 +946,10 @@ class Track(object):
     @property
     def band(self) -> Band:
         """
-        >>> t.band
+        >>> track.band
         <Band: Metallica>
 
-        >>> t2.band
+        >>> split_album_track.band
         <Band: Lunar Aurora>
         """
         if self.album.type == AlbumTypes.SPLIT:
@@ -963,7 +963,7 @@ class Track(object):
     @property
     def lyrics(self) -> 'Lyrics':
         """
-        >>> str(t.lyrics).split('\\n')[0]
+        >>> str(track.lyrics).split('\\n')[0]
         'Lashing out the action, returning the reaction'
         """
         return Lyrics(self.id)
@@ -985,16 +985,16 @@ if __name__ == '__main__':
     import doctest
 
     # Test objects
-    s = band_search('metallica')
-    b = s[0].get()
-    a = b.albums.search(type=AlbumTypes.FULL_LENGTH)[2]
-    t = a.tracks[0]
+    search_results = band_search('metallica')
+    band = search_results[0].get()
+    album = band.albums.search(type=AlbumTypes.FULL_LENGTH)[2]
+    track = album.tracks[0]
 
     # Objects for split album tests
-    a2 = album_for_id('42682')
-    t2 = a2.tracks[2]
+    split_album = album_for_id('42682')
+    split_album_track = split_album.tracks[2]
 
     # Objects for multi-disc album testing
-    a3 = album_for_id('338756')
+    multi_disc_album = album_for_id('338756')
 
     doctest.testmod(globs=locals())
