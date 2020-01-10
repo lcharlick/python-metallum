@@ -541,7 +541,7 @@ class AlbumCollection(MetallumCollection):
         super().__init__(url)
 
         rows = self._page('tr:gt(0)')
-        for index, album in enumerate(rows):
+        for index in range(len(rows)):
             self.append(AlbumWrapper(elem=rows.eq(index)))
 
 
