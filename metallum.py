@@ -133,6 +133,10 @@ def split_genres(s: str) -> List[str]:
     >>> split_genres('Thrash Metal (early), Hard Rock/Heavy/Thrash Metal (later)')
     ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
 
+    Split by semicolon separator:
+    >> split_genres('Deathcore (early); Melodic Death/Groove Metal')
+    ['Deathcore (early)', 'Melodic Death/Groove Metal']
+
     Handle no commas:
     >>> split_genres('Heavy Metal')
     ['Heavy Metal']
@@ -141,7 +145,7 @@ def split_genres(s: str) -> List[str]:
     >>> split_genres('Heavy Metal/Hard Rock (early, later), Thrash Metal (mid)')
     ['Heavy Metal/Hard Rock (early, later)', 'Thrash Metal (mid)']
     """
-    return re.split(r',\s*(?![^()]*\))', s)
+    return re.split(r'(?:,|;)\s*(?![^()]*\))', s)
 
 
 class AlbumTypes(object):
