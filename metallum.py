@@ -134,7 +134,7 @@ def split_genres(s: str) -> List[str]:
     ['Thrash Metal (early)', 'Hard Rock/Heavy/Thrash Metal (later)']
 
     Split by semicolon separator:
-    >> split_genres('Deathcore (early); Melodic Death/Groove Metal')
+    >>> split_genres('Deathcore (early); Melodic Death/Groove Metal')
     ['Deathcore (early)', 'Melodic Death/Groove Metal']
 
     Handle no commas:
