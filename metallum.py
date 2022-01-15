@@ -15,11 +15,11 @@ from urllib.parse import urlencode
 import requests_cache
 from dateutil import parser as date_parser
 from pyquery import PyQuery
-from requests_cache.core import remove_expired_responses
+# from requests_cache.core import remove_expired_responses
 
 CACHE_FILE = os.path.join(tempfile.gettempdir(), 'metallum_cache')
 requests_cache.install_cache(cache_name=CACHE_FILE, expire_after=300)
-remove_expired_responses()
+# remove_expired_responses()
 
 # Site details
 BASE_URL = 'https://www.metal-archives.com'
@@ -352,6 +352,7 @@ class BandResult(SearchResult):
         return self[2]
 
 
+
 class AlbumResult(SearchResult):
 
     def __init__(self, details):
@@ -533,6 +534,94 @@ class Band(MetallumEntity):
         """
         url = 'band/discography/id/{0}/tab/all'.format(self.id)
         return AlbumCollection(url)
+
+    @property
+    def similar_artists(self):
+        """
+        >>> band.similar_artists
+        <SimilarArtists: Megadeth (490) | Testament (415) | Exodus (212) | Evile (206) | Anthrax (184) | Death Angel (149) | Diamond Head (119) | Xentrix (114) | Annihilator (110) | Newsted (108) | Heathen (106) | Metal Church (105) | Flotsam and Jetsam (103) | Slayer (71) | Trivium (70) | Overkill (66) | Artillery (58) | Mortal Sin (58) | Volbeat (55) | Sacred Reich (50)>
+        """
+
+        url = 'band/ajax-recommendations/id/' + self.id
+        return SimilarArtists(url, SimilarArtistsResult)
+
+
+class SimilarArtists(Metallum, list):
+    """Entries in the similar artists tab
+    """
+    
+    def __init__(self, url, result_handler):
+        super().__init__(url)
+        data = self._content
+
+        links_list = PyQuery(data)('a')
+        values_list = PyQuery(data)('tr')
+
+        # assert(len(links_list) == len(values_list) - 1)
+        for i in range(0, len(links_list) -1):
+            details = [links_list[i].attrib.get('href')]
+            details.extend(values_list[i+1].text_content().split('\n')[1:-1])
+            self.append(result_handler(details))
+            self.result_count = i
+
+    def __repr__(self):
+
+        def similar_artist_str(SimilarArtistsResult):
+            return f'{SimilarArtistsResult.name} ({SimilarArtistsResult.score})'
+        if not self:
+            return '<SimilarArtists: None>'
+        names = list(map(similar_artist_str, self))
+        s = ' | '.join(names)
+        return '<SimilarArtists: {0}>'.format(s)
+
+
+class SimilarArtistsResult(list):
+    """Represents a entry in the similar artists tab
+    """
+    _resultType = Band
+
+    def __init__(self, details):
+        super().__init__()
+        self._details = details
+        for d in details:
+            self.append(d)
+    
+    @property
+    def id(self) -> str:
+        # url = PyQuery(self._details[0])('a').attr('href')
+        return re.search(r'\d+$', self[0]).group(0)
+
+    @property
+    def url(self) -> str:
+        return 'bands/_/{0}'.format(self.id)
+
+    @property
+    def name(self) -> str:
+        return self[1]
+
+    @property
+    def country(self) -> str:
+        """
+        >>> search_results[0].country
+        'United States'
+        """
+        return self[2]
+
+    @property
+    def genres(self) -> List[str]:
+        return split_genres(self[3])
+
+    @property
+    def score(self) -> int:
+        return int(self[4])
+
+
+    def __repr__(self):
+        s = ' | '.join(self[1:])
+        return '<SimilarArtist: {0}>'.format(s)
+
+    def get(self) -> 'Metallum':
+        return self._resultType(self.url)
 
 
 class AlbumCollection(MetallumCollection):
@@ -987,6 +1076,7 @@ if __name__ == '__main__':
     # Test objects
     search_results = band_search('metallica')
     band = search_results[0].get()
+    band.similar_artists
     album = band.albums.search(type=AlbumTypes.FULL_LENGTH)[2]
     track = album.tracks[0]
 
