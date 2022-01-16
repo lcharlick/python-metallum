@@ -24,6 +24,10 @@ bands[0].name
 # Fetch band page
 band = bands[0].get()
 
+# Fetch band's similiar artists
+band.similar_artists
+# -> <SimilarArtists: Megadeth (490) | Testament (415) | Exodus (212) | Evile (206) | Anthrax (184) | Death Angel (149) | Diamond Head (119) | Xentrix (114) | Annihilator (110) | Newsted (108) | Heathen (106) | Metal Church (105) | Flotsam and Jetsam (103) | Slayer (71) | Trivium (70) | Overkill (66) | Artillery (58) | Mortal Sin (58) | Volbeat (55) | Sacred Reich (50)>
+
 # Get all albums
 band.albums
 # -> [<Album: No Life 'til Leather (Demo)>, <Album: Kill 'Em All (Full-length)>, ...]
