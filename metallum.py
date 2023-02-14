@@ -83,7 +83,7 @@ def album_for_id(id: str) -> 'AlbumWrapper':
 
 def album_search(title, strict=True, band=None, band_strict=True, year_from=None,
                  year_to=None, month_from=None, month_to=None, countries=[], location=None, label=None,
-                 indie_label=False, genre=None, types=[], page_start=0) -> 'Search':
+                 indie_label=False, genre=None, types=[], formats=[], page_start=0) -> 'Search':
     """Perform an advanced album search
     """
     # Create a dict from the method arguments
@@ -114,6 +114,7 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
         'label': 'releaseLabelName',
         'indie_label': 'indieLabel',
         'types': 'releaseType[]',
+        'formats': 'releaseFormat[]',
         'page_start': 'iDisplayStart'
     })
 
