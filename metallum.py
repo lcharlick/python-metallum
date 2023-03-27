@@ -1150,12 +1150,7 @@ class Track(object):
         """
         s = self._elem('td').eq(2).text()
         if s:
-            parts = s.split(':')
-            seconds = int(parts[-1])
-            if len(parts) > 1:
-                seconds += int(parts[-2]) * 60
-            if len(parts) == 3:
-                seconds += int(parts[0]) * 3600
+            seconds = parse_duration(s)
         else:
             seconds = 0
         return seconds
