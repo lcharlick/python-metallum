@@ -159,8 +159,6 @@ def song_search(title, strict=True, band=None, band_strict=True, release=None,
         'band_strict': 'exactBandMatch',
         'release': 'releaseTitle',
         'release_strict': 'exactReleaseMatch',
-        'lyrics': 'lyrics',
-        'genre': 'genre',
         'types': 'releaseType[]',
         'page_start': 'iDisplayStart'
     })
