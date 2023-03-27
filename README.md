@@ -63,5 +63,28 @@ metallum.album_search('seventh', band='iron maiden', strict=False)
 
 ```
 
+Song search
+
+```python
+import metallum
+
+# Search songs matching term
+metallum.song_search('fear of the')
+# -> []
+
+# Search songs containing term
+metallum.album_search('fear of the', strict=False)
+# -> [<SearchResult: Antipope | 3 Eyes of Time | Full-length | The Fear of Fear | Progressive Black Metal (early); Progressive/Gothic/Industrial Metal (later) | 2588300>, ...]
+
+# Search songs by band
+metallum.song_search('fear of the', band='iron maiden', strict=False)
+# -> [<SearchResult: Iron Maiden | A Real Live One | Live album | Fear of the Dark | Heavy Metal, NWOBHM | 501324>, ...]
+
+# Search songs by release
+metallum.song_search('fear of the', release='fear of the dark', strict=False)
+# -> [<SearchResult: Iron Maiden | Fear of the Dark | Full-length | Fear of the Dark | Heavy Metal, NWOBHM | 3449>, ...]
+
+```
+
 Refer to source and doctests for detailed usage
 
