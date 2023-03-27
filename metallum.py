@@ -49,8 +49,8 @@ def band_for_id(id: str) -> 'Band':
 
 
 def band_search(name, strict=True, genre=None, countries=[], year_created_from=None,
-                year_created_to=None, status=[], themes=None, location=None, label=None,
-                page_start=0) -> 'Search':
+                year_created_to=None, status=[], themes=None, location=None,
+                label=None, additional_notes=None, page_start=0) -> 'Search':
     """Perform an advanced band search.
     """
     # Create a dict from the method arguments
@@ -68,6 +68,7 @@ def band_search(name, strict=True, genre=None, countries=[], year_created_from=N
         'year_created_to': 'yearCreationTo',
         'status': 'status[]',
         'label': 'bandLabelName',
+        'additional_notes': 'bandNotes',
         'page_start': 'iDisplayStart'
     })
 
@@ -82,8 +83,11 @@ def album_for_id(id: str) -> 'AlbumWrapper':
 
 
 def album_search(title, strict=True, band=None, band_strict=True, year_from=None,
-                 year_to=None, month_from=None, month_to=None, countries=[], location=None, label=None,
-                 indie_label=False, genre=None, types=[], page_start=0) -> 'Search':
+                 year_to=None, month_from=None, month_to=None, countries=[],
+                 location=None, label=None, indie_label=False, genre=None,
+                 catalog_number=None, identifiers=None, recording_info=None,
+                 version_description=None, additional_notes=None, types=[],
+                 page_start=0, formats=[]) -> 'Search':
     """Perform an advanced album search
     """
     # Create a dict from the method arguments
@@ -113,7 +117,13 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
         'countries': 'country[]',
         'label': 'releaseLabelName',
         'indie_label': 'indieLabel',
+        'catalog_number': 'releaseCatalogNumber',
+        'identifiers': 'releaseIdentifiers',
+        'recording_info': 'releaseRecordingInfo',
+        'version_description': 'releaseDescription',
+        'additional_notes': 'releaseNotes',
         'types': 'releaseType[]',
+        'formats': 'releaseFormat[]',
         'page_start': 'iDisplayStart'
     })
 
@@ -124,7 +134,8 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
 
 
 def song_search(title, strict=True, band=None, band_strict=True, release=None,
-                release_strict=True, lyrics=None, genre=None, types=[], page_start=0) -> 'Search':
+                release_strict=True, lyrics=None, genre=None, types=[],
+                page_start=0) -> 'Search':
     """Perform an advanced song search
     """
     # Create a dict from the method arguments
