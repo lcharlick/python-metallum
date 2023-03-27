@@ -165,7 +165,6 @@ def song_search(title, strict=True, band=None, band_strict=True, release=None,
 
     # Build the search URL
     url = 'search/ajax-advanced/searching/songs/?' + urlencode(params, True)
-    print(url)
 
     return Search(url, SongResult)
 
