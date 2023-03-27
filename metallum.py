@@ -15,7 +15,7 @@ from urllib.parse import urlencode
 import requests_cache
 from dateutil import parser as date_parser
 from pyquery import PyQuery
-from requests_cache.core import remove_expired_responses
+from requests_cache import remove_expired_responses
 
 CACHE_FILE = os.path.join(tempfile.gettempdir(), 'metallum_cache')
 requests_cache.install_cache(cache_name=CACHE_FILE, expire_after=300)
@@ -121,6 +121,44 @@ def album_search(title, strict=True, band=None, band_strict=True, year_from=None
     url = 'search/ajax-advanced/searching/albums/?' + urlencode(params, True)
 
     return Search(url, AlbumResult)
+
+
+def song_search(title, strict=True, band=None, band_strict=True, release=None,
+                release_strict=True, lyrics=None, genre=None, types=[], page_start=0) -> 'Search':
+    """Perform an advanced song search
+    """
+    # Create a dict from the method arguments
+    params = locals()
+
+    # Convert boolean value to integer
+    params['strict'] = str(int(params['strict']))
+    params['band_strict'] = str(int(params['band_strict']))
+    params['release_strict'] = str(int(params['release_strict']))
+
+    # Set genre as '*' if none is given to make sure
+    # that the correct number of parameters will be returned
+    if params['genre'] is None or len(params['genre'].strip()) == 0:
+        params['genre'] = '*'
+
+    # Map method arguments to their url query string counterparts
+    params = map_params(params, {
+        'title': 'songTitle',
+        'strict': 'exactSongMatch',
+        'band': 'bandName',
+        'band_strict': 'exactBandMatch',
+        'release': 'releaseTitle',
+        'release_strict': 'exactReleaseMatch',
+        'lyrics': 'lyrics',
+        'genre': 'genre',
+        'types': 'releaseType[]',
+        'page_start': 'iDisplayStart'
+    })
+
+    # Build the search URL
+    url = 'search/ajax-advanced/searching/songs/?' + urlencode(params, True)
+    print(url)
+
+    return Search(url, SongResult)
 
 
 def lyrics_for_id(id: int) -> 'Lyrics':
@@ -232,12 +270,10 @@ class MetallumEntity(Metallum):
         """Data on entity pages are stored in <dt> / <dd> pairs
         """
         labels = list(self._page('dt').contents())
-
         try:
             index = labels.index(label)
         except ValueError:
             return None
-
         return self._page('dd').eq(index)
 
     def _dd_text_for_label(self, label: str) -> str:
@@ -294,8 +330,12 @@ class SearchResult(list):
         super().__init__()
         for detail in details:
             if re.match('^<a href.*', detail):
-                d = PyQuery(detail)
-                self.append(d('a').text())
+                lyrics_link = re.search('id="lyricsLink_(\d+)"', detail)
+                if lyrics_link is not None:
+                    self.append(lyrics_link[1])
+                else:
+                    d = PyQuery(detail)
+                    self.append(d('a').text())
             else:
                 self.append(detail)
 
@@ -351,6 +391,10 @@ class BandResult(SearchResult):
         """
         return self[2]
 
+    @property
+    def other(self) -> str:
+        return self[3:]
+
 
 class AlbumResult(SearchResult):
 
@@ -389,6 +433,71 @@ class AlbumResult(SearchResult):
     @property
     def band_name(self) -> str:
         return self[0]
+
+
+class SongResult(SearchResult):
+
+    def __init__(self, details):
+        super().__init__(details)
+        self._details = details
+        self._resultType = None
+
+    def get(self) -> 'SongResult':
+        return self
+
+    @property
+    def id(self) -> str:
+        """
+        >>> song.id
+        '3449'
+        """
+        return re.search(r'(\d+)', self[5]).group(0)
+
+    @property
+    def title(self) -> str:
+        return self[3]
+
+    @property
+    def type(self) -> str:
+        return self[2]
+
+    @property
+    def band(self) -> 'Band':
+        url = PyQuery(self._details[0]).attr('href')
+        id = re.search('\d+$', url).group(0)
+        band = Band('bands/_/{0}'.format(id))
+        return band
+
+    @property
+    def band_name(self) -> str:
+        return self[0]
+
+    @property
+    def album(self) -> 'Album':
+        url = PyQuery(self._details[1]).attr('href')
+        id = re.search('\d+$', url).group(0)
+        album = Album('albums/_/_/{0}'.format(id))
+        return album
+
+    @property
+    def album_name(self) -> str:
+        return self[1]
+
+    @property
+    def genres(self) -> List[str]:
+        """
+        >>> song.genres
+        ['Heavy Metal', 'NWOBHM']
+        """
+        return split_genres(self[4])
+
+    @property
+    def lyrics(self) -> 'Lyrics':
+        """
+        >>> str(song.lyrics).split('\\n')[0]
+        'I am a man who walks alone'
+        """
+        return Lyrics(self.id)
 
 
 class Band(MetallumEntity):
@@ -488,9 +597,9 @@ class Band(MetallumEntity):
     def themes(self) -> List[str]:
         """
         >>> band.themes
-        ['Corruption', 'Death', 'Life', 'Internal struggles', 'Anger']
+        ['Introspection', 'Anger', 'Corruption', 'Deceit', 'Death', 'Life', 'Metal', 'Literature', 'Films']
         """
-        return self._dd_text_for_label('Lyrical themes:').split(', ')
+        return self._dd_text_for_label('Themes:').split(', ')
 
     @property
     def label(self) -> str:
@@ -503,8 +612,8 @@ class Band(MetallumEntity):
     @property
     def logo(self) -> Optional[str]:
         """
-        >>> band.logo
-        'https://www.metal-archives.com/images/1/2/5/125_logo.png'
+        >>> band.logo[:-3]
+        'https://www.metal-archives.com/images/1/2/5/125_logo.'
         """
         url = self._page('#logo').attr('href')
         if not url:
@@ -604,6 +713,9 @@ class Album(MetallumEntity):
 
     def __init__(self, url):
         super().__init__(url)
+
+    def __repr__(self):
+        return '<Album: {0}>'.format(self.title)
 
     @property
     def id(self) -> str:
@@ -731,7 +843,7 @@ class Album(MetallumEntity):
     def score(self) -> Optional[int]:
         """
         >>> album.score
-        79
+        81
 
         >>> split_album.score
         94
@@ -938,7 +1050,12 @@ class Track(object):
         """
         s = self._elem('td').eq(2).text()
         if s:
-            seconds = parse_duration(s)
+            parts = s.split(':')
+            seconds = int(parts[-1])
+            if len(parts) > 1:
+                seconds += int(parts[-2]) * 60
+            if len(parts) == 3:
+                seconds += int(parts[0]) * 3600
         else:
             seconds = 0
         return seconds
@@ -996,5 +1113,8 @@ if __name__ == '__main__':
 
     # Objects for multi-disc album testing
     multi_disc_album = album_for_id('338756')
+
+    # Objects for song search testing
+    song = song_search('Fear of the Dark', band='Iron Maiden', release='Fear of the Dark')[0]
 
     doctest.testmod(globs=locals())
