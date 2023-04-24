@@ -470,22 +470,24 @@ class SongResult(SearchResult):
         return self[2]
 
     @property
-    def band(self) -> 'Band':
-        url = PyQuery(self._details[0]).attr('href')
-        id = re.search('\d+$', url).group(0)
-        band = Band('bands/_/{0}'.format(id))
-        return band
+    def bands(self) -> List['Band']:
+        bands = []
+        el = PyQuery(self._details[0]).wrap('<div></div>')
+        for a in el.find('a'):
+            url = PyQuery(a).attr('href')
+            id = re.search(r'\d+$', url).group(0)
+            bands.append(Band('bands/_/{0}'.format(id)))
+        return bands
 
     @property
     def band_name(self) -> str:
         return self[0]
-
+    
     @property
     def album(self) -> 'Album':
         url = PyQuery(self._details[1]).attr('href')
         id = re.search('\d+$', url).group(0)
-        album = Album('albums/_/_/{0}'.format(id))
-        return album
+        return Album('albums/_/_/{0}'.format(id))
 
     @property
     def album_name(self) -> str:
@@ -497,7 +499,10 @@ class SongResult(SearchResult):
         >>> song.genres
         ['Heavy Metal', 'NWOBHM']
         """
-        return split_genres(self[4])
+        genres = []
+        for genre in self[4].split(' | '):
+            genres.extend(split_genres(genre.strip()))
+        return genres
 
     @property
     def lyrics(self) -> 'Lyrics':
