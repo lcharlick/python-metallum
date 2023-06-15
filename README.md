@@ -24,6 +24,10 @@ bands[0].name
 # Fetch band page
 band = bands[0].get()
 
+# Fetch band's similiar artists
+band.similar_artists
+# -> <SimilarArtists: Megadeth (490) | Testament (415) | Exodus (212) | Evile (206) | Anthrax (184) | Death Angel (149) | Diamond Head (119) | Xentrix (114) | Annihilator (110) | Newsted (108) | Heathen (106) | Metal Church (105) | Flotsam and Jetsam (103) | Slayer (71) | Trivium (70) | Overkill (66) | Artillery (58) | Mortal Sin (58) | Volbeat (55) | Sacred Reich (50)>
+
 # Get all albums
 band.albums
 # -> [<Album: No Life 'til Leather (Demo)>, <Album: Kill 'Em All (Full-length)>, ...]
@@ -60,6 +64,29 @@ metallum.album_search('seventh', strict=False)
 # Search albums by band
 metallum.album_search('seventh', band='iron maiden', strict=False)
 # -> [<SearchResult: Iron Maiden | Seventh Son of a Seventh Son | Full-length>]
+
+```
+
+Song search
+
+```python
+import metallum
+
+# Search songs matching term
+metallum.song_search('fear of the')
+# -> []
+
+# Search songs containing term
+metallum.album_search('fear of the', strict=False)
+# -> [<SearchResult: Antipope | 3 Eyes of Time | Full-length | The Fear of Fear | Progressive Black Metal (early); Progressive/Gothic/Industrial Metal (later) | 2588300>, ...]
+
+# Search songs by band
+metallum.song_search('fear of the', band='iron maiden', strict=False)
+# -> [<SearchResult: Iron Maiden | A Real Live One | Live album | Fear of the Dark | Heavy Metal, NWOBHM | 501324>, ...]
+
+# Search songs by release
+metallum.song_search('fear of the', release='fear of the dark', strict=False)
+# -> [<SearchResult: Iron Maiden | Fear of the Dark | Full-length | Fear of the Dark | Heavy Metal, NWOBHM | 3449>, ...]
 
 ```
 
